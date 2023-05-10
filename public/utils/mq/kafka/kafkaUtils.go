@@ -7,7 +7,7 @@ import (
 	"reflect"
 
 	"github.com/Shopify/sarama"
-	"github.com/sealsee/web-base/public/datasource"
+	"github.com/sealsee/web-base/public/ds"
 	"go.uber.org/zap"
 )
 
@@ -15,8 +15,8 @@ var prd sarama.SyncProducer
 var com sarama.ConsumerGroup
 
 func Init() {
-	prd = datasource.GetKafkaPrd()
-	com = datasource.GetKafkaCom()
+	prd = ds.GetKafkaPrd()
+	com = ds.GetKafkaCom()
 }
 
 type Handler func(string) error

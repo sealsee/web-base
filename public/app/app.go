@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/sealsee/web-base/public/IOFile"
-	"github.com/sealsee/web-base/public/datasource"
+	"github.com/sealsee/web-base/public/ds"
 	"github.com/sealsee/web-base/public/route"
 	"github.com/sealsee/web-base/public/setting"
 	"github.com/sealsee/web-base/public/utils"
@@ -21,8 +21,8 @@ func init() {
 	logger.Init()
 }
 
-func initCompent(settingDatasource *setting.Datasource) func() {
-	_, cleanup, err := datasource.InitCompent(settingDatasource)
+func initCompent(settingds *setting.Datasource) func() {
+	_, cleanup, err := ds.InitCompent(settingds)
 	if err != nil {
 		return nil
 	}

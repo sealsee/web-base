@@ -28,7 +28,7 @@ func ExportExcel(rows [][]string) (data []byte) {
 
 type ExcelImpCall interface {
 	Headers() []string
-	Data() []any
+	Row() map[string]interface{}
 }
 
 type ExcelExpCall interface {

@@ -10,7 +10,7 @@ func GetNodeId() int {
 	var id int = 1
 	// for true {
 	// 	id = rand.Intn(1023)
-	// 	val := datasource.GetRedisClient().Get("snowflake:" + gconv.String(id)).Val()
+	// 	val := ds.GetRedisClient().Get("snowflake:" + gconv.String(id)).Val()
 	// 	if val == "" {
 	// 		break
 	// 	}
@@ -22,7 +22,7 @@ func GetNodeId() int {
 
 	// go func(id string, data string) {
 	// 	for true {
-	// 		datasource.GetRedisClient().Set("snowflake:"+id, s, time.Hour+time.Minute).Err()
+	// 		ds.GetRedisClient().Set("snowflake:"+id, s, time.Hour+time.Minute).Err()
 	// 		t := time.NewTimer(time.Hour)
 	// 		<-t.C
 	// 	}

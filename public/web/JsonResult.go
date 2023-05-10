@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/sealsee/web-base/public/datasource"
+	"github.com/sealsee/web-base/public/ds/page"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sealsee/web-base/public/errs"
@@ -23,7 +23,7 @@ type JsonResult struct {
 	Code    string                 `json:"code"`
 	Msg     string                 `json:"msg"`
 	Data    map[string]interface{} `json:"data"`
-	Page    *datasource.Page       `json:"page"`
+	Page    *page.Page             `json:"page"`
 	c       *gin.Context
 }
 
@@ -88,7 +88,7 @@ func (json *JsonResult) SetList(ary interface{}) *JsonResult {
 	return json
 }
 
-func (json *JsonResult) SetPageList(ary interface{}, page *datasource.Page) *JsonResult {
+func (json *JsonResult) SetPageList(ary interface{}, page *page.Page) *JsonResult {
 	json.checkDataInit()
 	json.Data[LIST] = ary
 	json.Page = page

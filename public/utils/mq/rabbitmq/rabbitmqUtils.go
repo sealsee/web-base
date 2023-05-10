@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/sealsee/web-base/public/datasource"
+	"github.com/sealsee/web-base/public/ds"
 	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 )
@@ -12,7 +12,7 @@ import (
 var chn *amqp.Channel
 
 func Init() {
-	chn = datasource.GetRabbitMQChn()
+	chn = ds.GetRabbitMQChn()
 }
 
 type Handler func(string) error

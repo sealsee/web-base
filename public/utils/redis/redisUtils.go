@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/go-redis/redis"
-	"github.com/sealsee/web-base/public/datasource"
+	"github.com/sealsee/web-base/public/ds"
 	"go.uber.org/zap"
 
 	"time"
@@ -13,7 +13,7 @@ import (
 var client *redis.Client
 
 func Init() {
-	client = datasource.GetRedisClient()
+	client = ds.GetRedisClient()
 }
 
 func handelErr(err error) {

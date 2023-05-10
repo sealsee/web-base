@@ -89,7 +89,11 @@ func (g *groupTable) AddHandel(method MethodType, pattern string, action func(*g
 		}
 	}
 
-	UrlName[absolutePath] = g.Mark + "->" + mark
+	pathName := mark
+	if g.Mark != "" {
+		pathName = g.Mark + "->" + mark
+	}
+	UrlName[absolutePath] = pathName
 	return g
 }
 
