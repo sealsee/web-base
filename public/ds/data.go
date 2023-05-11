@@ -79,6 +79,7 @@ func InitCompent(d *setting.Datasource) (*Data, func(), error) {
 	mgoDb := newMongodb(d.Mongodb)
 
 	cleanup := func() {
+		zap.L().Sync()
 		masterDb.Close()
 		for _, db := range slaveDb {
 			db.Close()
@@ -111,7 +112,7 @@ func newGormDB(master *setting.Master) *gorm.DB {
 		//将标准输出作为Writer
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
 		logger.Config{
-			//设定慢查询时间阈值为1ms
+			//设定慢查询时间阈值为2ms
 			SlowThreshold: 2 * time.Second,
 			//设置日志级别，只有Warn和Info级别会输出慢查询日志
 			LogLevel: logger.Info,
@@ -120,9 +121,10 @@ func newGormDB(master *setting.Master) *gorm.DB {
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local&timeout=10s", master.User, master.Password, master.Host, master.Port, master.DB)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		SkipDefaultTransaction: true,
-		NamingStrategy:         schema.NamingStrategy{SingularTable: true},
-		Logger:                 slowLogger,
+		SkipDefaultTransaction:                   true,
+		DisableForeignKeyConstraintWhenMigrating: true,
+		NamingStrategy:                           schema.NamingStrategy{SingularTable: true},
+		Logger:                                   slowLogger,
 	})
 	if err != nil {
 		panic(err)
@@ -131,8 +133,8 @@ func newGormDB(master *setting.Master) *gorm.DB {
 	sqlDB, _ := db.DB()
 	sqlDB.SetMaxIdleConns(10)  //空闲连接数
 	sqlDB.SetMaxOpenConns(100) //最大连接数
-	sqlDB.SetConnMaxLifetime(time.Minute)
-	// sqlDB.SetConnMaxIdleTime()
+	sqlDB.SetConnMaxLifetime(30 * time.Minute)
+	sqlDB.SetConnMaxIdleTime(10 * time.Minute)
 	return db
 }
 

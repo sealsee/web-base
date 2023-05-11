@@ -1,10 +1,10 @@
 package basemodel
 
 type BaseEntity struct {
-	CreateBy   *int64    `json:"createBy" db:"create_by"`     //创建人
-	CreateTime *BaseTime `json:"createTime" db:"create_time"` //创建时间
-	UpdateBy   *int64    `json:"updateBy" db:"update_by"`     //修改人
-	UpdateTime *BaseTime `json:"updateTime" db:"update_time"` //修改时间
+	CreateBy   *int64    `json:"createBy"`   //创建人
+	CreateTime *BaseTime `json:"createTime"` //创建时间
+	UpdateBy   *int64    `json:"updateBy"`   //修改人
+	UpdateTime *BaseTime `json:"updateTime"` //修改时间
 }
 
 type BaseEntityQuery struct {

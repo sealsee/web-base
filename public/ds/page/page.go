@@ -35,6 +35,15 @@ func (p *Page) SetTotalSize(totalSize int) {
 	}
 }
 
+func (p *Page) SetPageSize(pageSize int) {
+	p.PageSize = pageSize
+	if pageSize != 0 {
+		if p.PageSize > MAX_PAGE_SIZE {
+			p.PageSize = MAX_PAGE_SIZE
+		}
+	}
+}
+
 func (p *Page) GetOffset() int {
 	if p.CurPage > 0 {
 		p.Offset = (p.CurPage - 1) * p.PageSize
