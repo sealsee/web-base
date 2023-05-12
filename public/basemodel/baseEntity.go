@@ -10,10 +10,10 @@ type BaseEntity struct {
 }
 
 type BaseEntityQuery struct {
-	CurPage  int    `gorm:"-" form:"curPage" json:"curPage,omitempty" default:"1"` //第几页
-	PageSize int    `gorm:"-" form:"pageSize" json:"pageSize,omitempty"`           //数量
-	OrderBy  string `gorm:"-" form:"orderBy" json:"orderBy,omitempty"`             //排序字段
-	IsAsc    string `gorm:"-" form:"isAsc" json:"isAsc,omitempty"`                 //排序规则  降序desc   asc升序
+	CurPage  int    `gorm:"-" form:"curPage" json:"curPage,omitempty"`   //第几页
+	PageSize int    `gorm:"-" form:"pageSize" json:"pageSize,omitempty"` //数量
+	OrderBy  string `gorm:"-" form:"orderBy" json:"orderBy,omitempty"`   //排序字段
+	IsAsc    string `gorm:"-" form:"isAsc" json:"isAsc,omitempty"`       //排序规则  降序desc   asc升序
 }
 
 func (p *BaseEntityQuery) GetPage() *page.Page {
