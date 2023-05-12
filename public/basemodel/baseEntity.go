@@ -3,10 +3,10 @@ package basemodel
 import "github.com/sealsee/web-base/public/ds/page"
 
 type BaseEntity struct {
-	CreateBy   *int64    `json:"createBy,omitempty" db:"create_by"`     //创建人
-	CreateTime *BaseTime `json:"createTime,omitempty" db:"create_time"` //创建时间
-	UpdateBy   *int64    `json:"updateBy,omitempty" db:"update_by"`     //修改人
-	UpdateTime *BaseTime `json:"updateTime,omitempty" db:"update_time"` //修改时间
+	CreateBy   int64    `json:"createBy,omitempty"`   //创建人
+	CreateTime BaseTime `json:"createTime,omitempty"` //创建时间
+	UpdateBy   int64    `json:"updateBy,omitempty"`   //修改人
+	UpdateTime BaseTime `json:"updateTime,omitempty"` //修改时间
 }
 
 type BaseEntityQuery struct {
