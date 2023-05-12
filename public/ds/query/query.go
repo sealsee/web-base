@@ -16,24 +16,40 @@ func InitGTx(gdb *gorm.DB) {
 }
 
 func ExecGetQueryCount[QT any, T any](where *QT) int {
+	if where == nil {
+		return 0
+	}
 	ts := []*T{}
 	var count int64
-	gormdb.Model(ts).Where(where).Count(&count)
+	rlt := gormdb.Model(ts).Where(where).Count(&count)
+	if rlt.Error != nil {
+		panic(rlt.Error)
+	}
 	return int(count)
 }
 
 func ExecQueryList[QT any, T any](where *QT, page *page.Page) []*T {
+	if where == nil || page == nil {
+		return nil
+	}
+
 	ts := []*T{}
 	var count int64
-	gormdb.Model(ts).Where(where).Count(&count)
+	rlt := gormdb.Model(ts).Where(where).Count(&count)
+	if rlt.Error != nil {
+		panic(rlt.Error)
+	}
 	if count < 1 {
 		return nil
 	}
 
 	page.SetTotalSize(int(count))
-	rlt := gormdb.Offset(page.GetOffset()).Limit(page.GetLimit()).Where(where).Find(&ts)
+	rlt = gormdb.Offset(page.GetOffset()).Limit(page.GetLimit()).Where(where).Find(&ts)
 	if rlt.RowsAffected <= 0 {
 		return nil
+	}
+	if rlt.Error != nil {
+		panic(rlt.Error)
 	}
 	return ts
 }
@@ -69,6 +85,5 @@ func HandListPageQuery[T any](db *sqlx.DB, query string, args interface{}, page 
 		list = append(list, data)
 	}
 	defer listRows.Close()
-
 	return list
 }

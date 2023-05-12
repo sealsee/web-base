@@ -24,8 +24,8 @@ func RegisterServer() *gin.Engine {
 		gin.SetMode(gin.ReleaseMode) // gin设置成发布模式
 	}
 	app := gin.New()
-	app.Use(logger.GinLogger(&UrlName), logger.GinRecovery(true))
 	app.Use(Cors())
+	app.Use(logger.GinLogger(&UrlName), logger.GinRecovery(true))
 	group := app.Group("")
 	host := setting.Conf.Host
 	docs.SwaggerInfo.Host = host[strings.Index(host, "//")+2:]

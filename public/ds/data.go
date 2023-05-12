@@ -14,6 +14,7 @@ import (
 	"github.com/sealsee/web-base/public/ds/query"
 	"github.com/sealsee/web-base/public/ds/tx"
 	"github.com/sealsee/web-base/public/setting"
+	lg "github.com/sealsee/web-base/public/utils/logger"
 	"github.com/streadway/amqp"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -110,7 +111,7 @@ func InitCompent(d *setting.Datasource) (*Data, func(), error) {
 func newGormDB(master *setting.Master) *gorm.DB {
 	slowLogger := logger.New(
 		//将标准输出作为Writer
-		log.New(os.Stdout, "\r\n", log.LstdFlags),
+		lg.NewSqlWriter(log.New(os.Stdout, "\r\n", log.LstdFlags)),
 		logger.Config{
 			//设定慢查询时间阈值为2ms
 			SlowThreshold: 2 * time.Second,

@@ -56,7 +56,6 @@ func Init() {
 	}
 
 	lg = zap.New(core, zap.AddCaller())
-
 	zap.ReplaceGlobals(lg)
 	zap.L().Info("Logger logger success")
 }
@@ -65,7 +64,7 @@ func getEncoder() zapcore.Encoder {
 	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	encoderConfig.TimeKey = "time"
-	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+	encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	encoderConfig.EncodeDuration = zapcore.SecondsDurationEncoder
 	encoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
 	return zapcore.NewJSONEncoder(encoderConfig)
@@ -138,6 +137,7 @@ func GinLogger(url *map[string]string) gin.HandlerFunc {
 				"userName":   "",
 			}
 			lg.Info(path, zap.Any("", params))
+			go Log(params)
 			// lg.Info(path,
 			// 	zap.Time("reqTime", start),
 			// 	zap.String("appName", ""),
@@ -190,6 +190,7 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 					return
 				}
 
+				params := map[string]any{}
 				if stack {
 					lg.Error("[Recovery from panic]",
 						zap.Any("error", err),
@@ -199,6 +200,13 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 						zap.String("user-agent", c.Request.UserAgent()),
 						zap.String("stack", string(debug.Stack())),
 					)
+					params["error"] = err
+					params["path"] = c.Request.URL.Path
+					params["query"] = err
+					params["ip"] = c.ClientIP()
+					params["user-agent"] = c.Request.UserAgent()
+					params["stack"] = string(debug.Stack())
+
 					if setting.Conf.Mode == "dev" {
 						fmt.Printf("error:%s\n", err)
 						fmt.Println("stack:" + string(debug.Stack()))
@@ -210,6 +218,7 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 					)
 				}
 
+				go ErrLog(params)
 				c.JSON(http.StatusOK, web.JsonResult{Code: fmt.Sprintf("%d", httpStatus.Error), Msg: httpStatus.Error.Msg()})
 			}
 		}()
