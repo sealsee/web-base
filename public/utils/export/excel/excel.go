@@ -4,7 +4,11 @@ import (
 	"strconv"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
+	"github.com/sealsee/web-base/public/utils/export/internal"
 )
+
+type Excel struct {
+}
 
 func ExportExcel(dataList [][]interface{}) (data []byte) {
 	f := excelize.NewFile()
@@ -19,29 +23,18 @@ func ExportExcel(dataList [][]interface{}) (data []byte) {
 	return buffer.Bytes()
 }
 
-type ExcelImpCall interface {
-	Headers() []string
-	Row() map[string]interface{}
-}
-
-type ExcelExpCall interface {
-	Before()
-	Extract() []any
-	After()
-}
-
-func ImportExcel(bytes []byte, impCall ExcelImpCall) error {
+func (e *Excel) Import(bytes []byte, handler internal.ImpHandler) error {
 	return nil
 }
 
-func ImportExcelWithUrl(ossUrl string, impCall ExcelImpCall) error {
+func (e *Excel) ImportWithUrl(url string, handler internal.ImpHandler) error {
 	return nil
 }
 
-func ExportExcelSync(headers map[string]string, expCall ExcelExpCall) ([]byte, error) {
+func (e *Excel) ExportSync(headers map[string]string, handler internal.ExpHandler) ([]byte, error) {
 	return nil, nil
 }
 
-func ExportExcelAsync(headers map[string]string, expCall ExcelExpCall) (string, error) {
+func (e *Excel) ExportAsync(headers map[string]string, handler internal.ExpHandler) (string, error) {
 	return "", nil
 }
