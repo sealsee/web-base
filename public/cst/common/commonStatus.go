@@ -4,8 +4,6 @@ package common
 const (
 	Normal  = 1 // 正常的
 	Deleted = 2 // 已删除的
-	Yes     = 1 // 是
-	No      = 2 // 否
 )
 
 const (
@@ -13,9 +11,10 @@ const (
 	DBF   int = 2
 )
 
+// 用户状态
 const (
 	OK      = "1"
-	Disable = "2"
+	Disable = "0"
 )
 
 var UserCodeMsgMap = map[string]string{
