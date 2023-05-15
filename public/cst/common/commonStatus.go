@@ -14,11 +14,11 @@ const (
 )
 
 const (
-	OK      = 1
-	Disable = 2
+	OK      = "1"
+	Disable = "2"
 )
 
-var UserCodeMsgMap = map[int]string{
+var UserCodeMsgMap = map[string]string{
 	OK:      "正常",
 	Disable: "停用",
 }
