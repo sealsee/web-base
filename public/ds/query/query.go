@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/sealsee/web-base/public/basemodel"
 	"github.com/sealsee/web-base/public/ds/page"
 	"gorm.io/gorm"
 )
@@ -28,7 +29,7 @@ func ExecGetQueryCount[QT any, T any](where *QT) int {
 	return int(count)
 }
 
-func ExecQueryList[QT any, T any](where *QT, page *page.Page) []*T {
+func ExecQueryList[QT any, T any](where basemodel.IQuery, page *page.Page) []*T {
 	if where == nil || page == nil {
 		return nil
 	}
@@ -44,7 +45,46 @@ func ExecQueryList[QT any, T any](where *QT, page *page.Page) []*T {
 	}
 
 	page.SetTotalSize(int(count))
-	rlt = gormdb.Offset(page.GetOffset()).Limit(page.GetLimit()).Where(where).Find(&ts)
+	rlt = gormdb.Offset(page.GetOffset()).Limit(page.GetLimit()).Where(where).Order(where.GetOrders()).Find(&ts)
+	if rlt.RowsAffected <= 0 {
+		return nil
+	}
+	if rlt.Error != nil {
+		panic(rlt.Error)
+	}
+	return ts
+}
+
+func ExecGetQueryCountWithCondition[T any](query interface{}, args ...interface{}) int {
+	if query == nil || args == nil {
+		return 0
+	}
+	ts := []*T{}
+	var count int64
+	rlt := gormdb.Model(ts).Where(query, args...).Count(&count)
+	if rlt.Error != nil {
+		panic(rlt.Error)
+	}
+	return int(count)
+}
+
+func ExecQueryListWithCondition[T any](page *page.Page, orders string, query interface{}, args ...interface{}) []*T {
+	if page == nil {
+		return nil
+	}
+
+	ts := []*T{}
+	var count int64
+	rlt := gormdb.Model(ts).Where(query, args...).Count(&count)
+	if rlt.Error != nil {
+		panic(rlt.Error)
+	}
+	if count < 1 {
+		return nil
+	}
+
+	page.SetTotalSize(int(count))
+	rlt = gormdb.Offset(page.GetOffset()).Limit(page.GetLimit()).Where(query, args...).Order(orders).Find(&ts)
 	if rlt.RowsAffected <= 0 {
 		return nil
 	}

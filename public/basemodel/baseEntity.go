@@ -8,6 +8,10 @@ import (
 	"github.com/sealsee/web-base/public/ds/page"
 )
 
+type IQuery interface {
+	GetOrders() string
+}
+
 type BaseEntity struct {
 	Deleted    int      `json:"-"`
 	CreateBy   int64    `json:"createBy,string,omitempty"` //创建人
@@ -20,7 +24,7 @@ type BaseEntityQuery struct {
 	Deleted  int      `json:"-"`
 	CurPage  int      `gorm:"-" form:"curPage" json:"curPage,omitempty"`   //第几页
 	PageSize int      `gorm:"-" form:"pageSize" json:"pageSize,omitempty"` //数量
-	Orders   []string `gorm:"-" json:"-"`
+	orders   []string `gorm:"-" json:"-"`
 }
 
 func (p *BaseEntity) SetCreateBy(createBy int64) {
@@ -51,22 +55,22 @@ func (p *BaseEntityQuery) GetPage() *page.Page {
 }
 
 func (p *BaseEntityQuery) AddOrderAsc(column string) {
-	if p.Orders == nil {
-		p.Orders = make([]string, 0)
+	if p.orders == nil {
+		p.orders = make([]string, 0)
 	}
-	p.Orders = append(p.Orders, column+" ASC")
+	p.orders = append(p.orders, column+" ASC")
 }
 
 func (p *BaseEntityQuery) AddOrderDesc(column string) {
-	if p.Orders == nil {
-		p.Orders = make([]string, 0)
+	if p.orders == nil {
+		p.orders = make([]string, 0)
 	}
-	p.Orders = append(p.Orders, column+" DESC")
+	p.orders = append(p.orders, column+" DESC")
 }
 
 func (p *BaseEntityQuery) GetOrders() string {
-	if p.Orders == nil || len(p.Orders) <= 0 {
+	if p.orders == nil || len(p.orders) <= 0 {
 		return ""
 	}
-	return strings.Join(p.Orders, ",")
+	return strings.Join(p.orders, ",")
 }

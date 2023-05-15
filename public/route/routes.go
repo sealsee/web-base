@@ -31,7 +31,9 @@ func RegisterServer() *gin.Engine {
 	docs.SwaggerInfo.Host = host[strings.Index(host, "//")+2:]
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
-	group.GET("/swagger/*any", gs.WrapHandler(swaggerFiles.Handler))
+	if setting.Conf.Mode == "dev" {
+		group.GET("/swagger/*any", gs.WrapHandler(swaggerFiles.Handler))
+	}
 	//如果是本地存储则开启
 	if !IOFile.FileType.Contains(setting.Conf.UploadFile.Type) {
 		path := setting.Conf.UploadFile.Localhost.PublicResourcePrefix
