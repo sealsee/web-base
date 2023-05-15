@@ -10,10 +10,10 @@ import (
 
 type BaseEntity struct {
 	Deleted    int      `json:"-"`
-	CreateBy   int64    `json:"createBy,omitempty"`   //创建人
-	CreateTime BaseTime `json:"createTime,omitempty"` //创建时间
-	UpdateBy   int64    `json:"updateBy,omitempty"`   //修改人
-	UpdateTime BaseTime `json:"updateTime,omitempty"` //修改时间
+	CreateBy   int64    `json:"createBy,string,omitempty"` //创建人
+	CreateTime BaseTime `json:"createTime,omitempty"`      //创建时间
+	UpdateBy   int64    `json:"updateBy,string,omitempty"` //修改人
+	UpdateTime BaseTime `json:"updateTime,omitempty"`      //修改时间
 }
 
 type BaseEntityQuery struct {

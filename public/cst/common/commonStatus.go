@@ -4,16 +4,18 @@ package common
 const (
 	Normal  = 1 // 正常的
 	Deleted = 2 // 已删除的
-)
-
-const (
-	OK      string = "0"
-	Disable string = "1"
+	Yes     = 1 // 是
+	No      = 2 // 否
 )
 
 const (
 	EXCEL int = 1
 	DBF   int = 2
+)
+
+const (
+	OK      = "1"
+	Disable = "2"
 )
 
 var UserCodeMsgMap = map[string]string{
