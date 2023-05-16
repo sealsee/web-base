@@ -23,7 +23,6 @@ type JsonResult struct {
 	Code    string                 `json:"code"`
 	Msg     string                 `json:"msg"`
 	Data    map[string]interface{} `json:"data"`
-	Page    *page.Page             `json:"page"`
 	c       *gin.Context
 }
 
@@ -91,7 +90,7 @@ func (json *JsonResult) SetList(ary interface{}) *JsonResult {
 func (json *JsonResult) SetPageList(ary interface{}, page *page.Page) *JsonResult {
 	json.checkDataInit()
 	json.Data[LIST] = ary
-	json.Page = page
+	json.Data[PAGE] = page
 	return json
 }
 
