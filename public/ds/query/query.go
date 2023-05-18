@@ -94,6 +94,24 @@ func ExecQueryListWithCondition[T any](where basemodel.IQuery, page *page.Page, 
 	return ts
 }
 
+func ExecQueryListWithColumns[T any](columns string, where basemodel.IQuery, query interface{}, args ...interface{}) []*T {
+	if where == nil || columns == "" {
+		return nil
+	}
+
+	ts := []*T{}
+
+	rlt := gormdb.Select(columns).Where(where).Where(query, args...).Find(&ts)
+	if rlt.RowsAffected <= 0 {
+		return nil
+	}
+	if rlt.Error != nil {
+		panic(rlt.Error)
+	}
+	return ts
+}
+
+// 废弃
 func HandListPageQuery[T any](db *sqlx.DB, query string, args interface{}, page *page.Page) (list []*T) {
 	//sql := strings.ToUpper(query)
 	countRow, err := db.NamedQuery("SELECT COUNT(*) "+query[strings.Index(query, " FROM "):], args)
