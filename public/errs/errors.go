@@ -10,3 +10,5 @@ var USER_DISABLED_ERR = ERROR{"004", "对不起，您的账号：%s 已停用"}
 var CAPTCHA_ERR = ERROR{"005", "验证码错误"}
 var PARAM_INVALID_ERR = ERROR{"006", "参数错误"}
 var HANDLE_ERR = ERROR{"007", "操作失败"}
+var FILE_UPLOAD_ERR = ERROR{"008", "文件上传失败"}
+var FILE_DOWNLOAD_ERR = ERROR{"009", "文件下载失败"}

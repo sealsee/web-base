@@ -32,7 +32,7 @@ func (l *localHostIOFile) PublicUploadFile(file *fileParams) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return l.domainName + cst.ResourcePrefix + "/" + file.keyName, nil
+	return cst.ResourcePrefix + "/" + file.keyName, nil
 }
 
 func (l *localHostIOFile) privateUploadFile(file *fileParams) (string, error) {
