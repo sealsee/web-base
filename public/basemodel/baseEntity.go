@@ -74,3 +74,26 @@ func (p *BaseEntityQuery) GetOrders() string {
 	}
 	return strings.Join(p.orders, ",")
 }
+
+type ALIGN string
+
+const (
+	LEFT  ALIGN = "L"
+	RIGHT ALIGN = "R"
+	ALL   ALIGN = "A"
+)
+
+// 左LIKE %?
+func (p *BaseEntityQuery) LikeL(colum string) string {
+	return "%" + colum
+}
+
+// 右LIKE ?%
+func (p *BaseEntityQuery) LikeR(colum string) string {
+	return colum + "%"
+}
+
+// 全LIKE %?%
+func (p *BaseEntityQuery) LikeA(colum string) string {
+	return colum + "%"
+}
