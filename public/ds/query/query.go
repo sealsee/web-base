@@ -95,13 +95,13 @@ func ExecQueryListWithCondition[T any](where basemodel.IQuery, page *page.Page, 
 }
 
 func ExecQueryListWithColumns[T any](columns []string, where basemodel.IQuery, query interface{}, args ...interface{}) []*T {
-	if where == nil || columns == nil {
+	if columns == nil || where == nil {
 		return nil
 	}
 
 	ts := []*T{}
 
-	rlt := gormdb.Select(columns).Where(where).Where(query, args...).Find(&ts)
+	rlt := gormdb.Select(columns).Where(where).Where(query, args...).Limit(100).Find(&ts)
 	if rlt.RowsAffected <= 0 {
 		return nil
 	}
