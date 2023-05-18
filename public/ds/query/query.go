@@ -55,27 +55,27 @@ func ExecQueryList[QT any, T any](where basemodel.IQuery, page *page.Page) []*T 
 	return ts
 }
 
-func ExecGetQueryCountWithCondition[T any](query interface{}, args ...interface{}) int {
-	if query == nil || args == nil {
+func ExecGetQueryCountWithCondition[T any](where basemodel.IQuery, query interface{}, args ...interface{}) int {
+	if (where == nil && query == nil) || args == nil {
 		return 0
 	}
 	ts := []*T{}
 	var count int64
-	rlt := gormdb.Model(ts).Where(query, args...).Count(&count)
+	rlt := gormdb.Model(ts).Where(where).Where(query, args...).Count(&count)
 	if rlt.Error != nil {
 		panic(rlt.Error)
 	}
 	return int(count)
 }
 
-func ExecQueryListWithCondition[T any](page *page.Page, orders string, query interface{}, args ...interface{}) []*T {
+func ExecQueryListWithCondition[T any](where basemodel.IQuery, page *page.Page, query interface{}, args ...interface{}) []*T {
 	if page == nil {
 		return nil
 	}
 
 	ts := []*T{}
 	var count int64
-	rlt := gormdb.Model(ts).Where(query, args...).Count(&count)
+	rlt := gormdb.Model(ts).Where(where).Where(query, args...).Count(&count)
 	if rlt.Error != nil {
 		panic(rlt.Error)
 	}
@@ -84,7 +84,7 @@ func ExecQueryListWithCondition[T any](page *page.Page, orders string, query int
 	}
 
 	page.SetTotalSize(int(count))
-	rlt = gormdb.Offset(page.GetOffset()).Limit(page.GetLimit()).Where(query, args...).Order(orders).Find(&ts)
+	rlt = gormdb.Offset(page.GetOffset()).Limit(page.GetLimit()).Where(where).Where(query, args...).Order(where.GetOrders()).Find(&ts)
 	if rlt.RowsAffected <= 0 {
 		return nil
 	}
