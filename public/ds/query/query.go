@@ -94,8 +94,8 @@ func ExecQueryListWithCondition[T any](where basemodel.IQuery, page *page.Page, 
 	return ts
 }
 
-func ExecQueryListWithColumns[T any](columns string, where basemodel.IQuery, query interface{}, args ...interface{}) []*T {
-	if where == nil || columns == "" {
+func ExecQueryListWithColumns[T any](columns []string, where basemodel.IQuery, query interface{}, args ...interface{}) []*T {
+	if where == nil || columns == nil {
 		return nil
 	}
 
