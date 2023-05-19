@@ -2,8 +2,10 @@ package IOFile
 
 import (
 	"bytes"
-	"io/ioutil"
+	"errors"
+	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/sealsee/web-base/public/cst"
 	"github.com/sealsee/web-base/public/utils/fileUtils"
@@ -28,7 +30,7 @@ func (l *localHostIOFile) PublicUploadFile(file *fileParams) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	err = ioutil.WriteFile(pathAndName, b, 0664)
+	err = os.WriteFile(pathAndName, b, 0664)
 	if err != nil {
 		return "", err
 	}
@@ -47,9 +49,17 @@ func (l *localHostIOFile) privateUploadFile(file *fileParams) (string, error) {
 		return "", err
 	}
 	b := buf.Bytes()
-	err = ioutil.WriteFile(pathAndName, b, 0664)
+	err = os.WriteFile(pathAndName, b, 0664)
 	if err != nil {
 		return "", err
 	}
 	return file.keyName, nil
+}
+
+func (l *localHostIOFile) GetFileFullName(filename string) (string, error) {
+	if !strings.HasPrefix(filename, cst.ResourcePrefix+"/") {
+		return "", errors.New("wrong path! should prefix with '/profile/'.")
+	}
+	keyName := strings.Replace(filename, cst.ResourcePrefix+"/", "", 1)
+	return l.publicPath + keyName, nil
 }
