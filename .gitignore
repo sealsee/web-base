@@ -3,3 +3,4 @@ main.go
 *.xls
 config.yaml
 logs/
+.vscode/

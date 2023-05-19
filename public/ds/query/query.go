@@ -20,9 +20,9 @@ func ExecGetQueryCount[QT any, T any](where *QT) int {
 	if where == nil {
 		return 0
 	}
-	ts := []*T{}
+	t := new(T)
 	var count int64
-	rlt := gormdb.Model(ts).Where(where).Count(&count)
+	rlt := gormdb.Model(t).Where(where).Count(&count)
 	if rlt.Error != nil {
 		panic(rlt.Error)
 	}
@@ -59,9 +59,10 @@ func ExecGetQueryCountWithCondition[T any](where basemodel.IQuery, query interfa
 	if (where == nil && query == nil) || args == nil {
 		return 0
 	}
-	ts := []*T{}
+
+	t := new(T)
 	var count int64
-	rlt := gormdb.Model(ts).Where(where).Where(query, args...).Count(&count)
+	rlt := gormdb.Model(t).Where(where).Where(query, args...).Count(&count)
 	if rlt.Error != nil {
 		panic(rlt.Error)
 	}
@@ -73,9 +74,9 @@ func ExecQueryListWithCondition[T any](where basemodel.IQuery, page *page.Page, 
 		return nil
 	}
 
-	ts := []*T{}
+	t := new(T)
 	var count int64
-	rlt := gormdb.Model(ts).Where(where).Where(query, args...).Count(&count)
+	rlt := gormdb.Model(t).Where(where).Where(query, args...).Count(&count)
 	if rlt.Error != nil {
 		panic(rlt.Error)
 	}
@@ -83,8 +84,36 @@ func ExecQueryListWithCondition[T any](where basemodel.IQuery, page *page.Page, 
 		return nil
 	}
 
+	ts := []*T{}
 	page.SetTotalSize(int(count))
 	rlt = gormdb.Offset(page.GetOffset()).Limit(page.GetLimit()).Where(where).Where(query, args...).Order(where.GetOrders()).Find(&ts)
+	if rlt.RowsAffected <= 0 {
+		return nil
+	}
+	if rlt.Error != nil {
+		panic(rlt.Error)
+	}
+	return ts
+}
+
+func ExecQueryListMapWithCondition[T any](where basemodel.IQuery, page *page.Page, query interface{}, args ...interface{}) []map[string]any {
+	if page == nil {
+		return nil
+	}
+
+	t := new(T)
+	var count int64
+	rlt := gormdb.Model(t).Where(where).Where(query, args...).Count(&count)
+	if rlt.Error != nil {
+		panic(rlt.Error)
+	}
+	if count < 1 {
+		return nil
+	}
+
+	var ts []map[string]any
+	page.SetTotalSize(int(count))
+	rlt = gormdb.Model(t).Offset(page.GetOffset()).Limit(page.GetLimit()).Where(where).Where(query, args...).Order(where.GetOrders()).Find(&ts)
 	if rlt.RowsAffected <= 0 {
 		return nil
 	}
