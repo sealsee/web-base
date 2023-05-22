@@ -3,8 +3,8 @@ package excel
 import (
 	"strconv"
 
-	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/sealsee/web-base/public/utils/export/internal"
+	"github.com/xuri/excelize/v2"
 )
 
 type Excel struct {
