@@ -2,6 +2,7 @@ package IOFile
 
 import (
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
@@ -41,4 +42,9 @@ func (s *s3IOFile) privateUploadFile(file *fileParams) (string, error) {
 		return "", err
 	}
 	return file.keyName, nil
+}
+
+func (l *s3IOFile) GetFileFullName(filename string) (string, error) {
+	// TODO
+	return "", nil
 }

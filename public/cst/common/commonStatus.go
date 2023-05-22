@@ -7,8 +7,9 @@ const (
 )
 
 const (
-	EXCEL int = 1
-	DBF   int = 2
+	OPER_TYPE_IMPORT_DATA   int = 1 // 导入数据
+	OPER_TYPE_IMPORT_UPDATE int = 2 // 导入更新数据
+	OPER_TYPE_EXPORT        int = 3 // 导出
 )
 
 // 用户状态

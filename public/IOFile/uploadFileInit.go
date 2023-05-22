@@ -22,6 +22,7 @@ var FileType = set.Set[string]{}
 type IOFile interface {
 	PublicUploadFile(file *fileParams) (string, error)
 	privateUploadFile(file *fileParams) (string, error)
+	GetFileFullName(filename string) (string, error)
 }
 
 var ioFile IOFile
