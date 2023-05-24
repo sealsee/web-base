@@ -57,8 +57,8 @@ func RegisterServer() *gin.Engine {
 		pprof.RouteRegister(group1)
 	}
 	app.NoRoute(func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"msg": "404",
+		c.JSON(http.StatusNotFound, gin.H{
+			"msg": "404-找不到请求资源",
 		})
 	})
 	return app
