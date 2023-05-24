@@ -12,3 +12,5 @@ var PARAM_INVALID_ERR = ERROR{"006", "参数错误"}
 var HANDLE_ERR = ERROR{"007", "操作失败"}
 var FILE_UPLOAD_ERR = ERROR{"008", "文件上传失败"}
 var FILE_DOWNLOAD_ERR = ERROR{"009", "文件下载失败"}
+var FILE_UPLOAD_MAX_NUM = ERROR{"010", "文件上传个数超出限制"}
+var FILE_UPLOAD_MAX_SIZE = ERROR{"011", "文件上传大小超出限制"}
