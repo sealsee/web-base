@@ -48,3 +48,7 @@ func (l *s3IOFile) GetFileFullName(filename string) (string, error) {
 	// TODO
 	return "", nil
 }
+
+func (l *s3IOFile) Download(url string) ([]byte, error) {
+	return nil, nil
+}

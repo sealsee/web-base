@@ -1,8 +1,9 @@
 package page
 
 const (
-	PAGE_SIZE     = 10
-	MAX_PAGE_SIZE = 1000
+	PAGE_SIZE        = 10
+	EXPORT_PAGE_SIZE = 100
+	MAX_PAGE_SIZE    = 1000
 )
 
 type Page struct {
@@ -18,6 +19,10 @@ func NewPage() *Page {
 	return &Page{CurPage: 1, PageSize: PAGE_SIZE}
 }
 
+func NewExportPage() *Page {
+	return &Page{CurPage: 1, PageSize: EXPORT_PAGE_SIZE}
+}
+
 func (p *Page) SetTotalSize(totalSize int) {
 	p.TotalSize = totalSize
 	if totalSize != 0 {
@@ -29,9 +34,9 @@ func (p *Page) SetTotalSize(totalSize int) {
 		} else {
 			p.TotalPage = totalSize/p.PageSize + 1
 		}
-		if p.CurPage > p.TotalPage {
-			p.CurPage = p.TotalPage
-		}
+		// if p.CurPage > p.TotalPage {
+		// 	p.CurPage = p.TotalPage
+		// }
 	}
 }
 
@@ -54,4 +59,13 @@ func (p *Page) GetOffset() int {
 func (p *Page) GetLimit() int {
 	p.Limit = p.PageSize
 	return p.Limit
+}
+
+func (p *Page) NextPage() bool {
+	if p.CurPage >= p.TotalPage {
+		return false
+	}
+
+	p.CurPage++
+	return true
 }

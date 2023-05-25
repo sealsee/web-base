@@ -67,3 +67,7 @@ func (l *localHostIOFile) GetFileFullName(filename string) (string, error) {
 	keyName := strings.Replace(filename, cst.ResourcePrefix+"/", "", 1)
 	return l.publicPath + keyName, nil
 }
+
+func (l *localHostIOFile) Download(url string) ([]byte, error) {
+	return nil, nil
+}

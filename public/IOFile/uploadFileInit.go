@@ -23,6 +23,7 @@ type IOFile interface {
 	PublicUploadFile(file *fileParams) (string, error)
 	privateUploadFile(file *fileParams) (string, error)
 	GetFileFullName(filename string) (string, error)
+	Download(url string) ([]byte, error)
 }
 
 var ioFile IOFile

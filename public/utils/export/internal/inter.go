@@ -1,19 +1,50 @@
 package internal
 
+import (
+	"time"
+
+	"github.com/sealsee/web-base/public/ds/page"
+)
+
 type ImpHandler interface {
-	Headers() []string
-	Row() map[string]interface{}
+	Headers([]string)
+	Row(*map[string]string)
+	After()
 }
 
 type ExpHandler interface {
-	Before()
-	Rows() []map[string]interface{}
-	After()
+	Title() string
+	HeaderColumn() []string // {"表头1,字段名1","表头2,字段名2","表头3,字段名3"...}
+	Rows(*page.Page) []map[string]interface{}
+	Finish(url string)
 }
 
 type ImpExp interface {
 	Import(bytes []byte, handler ImpHandler) error
 	ImportWithUrl(url string, handler ImpHandler) error
-	ExportSync(headers map[string]string, handler ExpHandler) ([]byte, error)
-	ExportAsync(headers map[string]string, handler ExpHandler) (string, error)
+	ExportSync(handler ExpHandler) ([]byte, error)
+	ExportAsync(handler ExpHandler) (string, error)
+	GetProcess(taskid string) float32
+}
+
+type Task struct {
+	TaskId     string
+	Title      string
+	AddTime    time.Time
+	StartTime  time.Time
+	FinishTime time.Time
+	Handler    ExpHandler
+	Process    float32
+	Expcount   int
+	TotalSize  int
+	CostTime   time.Duration
+	Timer      int //12
+}
+
+func (t *Task) TimerAndExpire() bool {
+	if t.Timer >= 11 {
+		return true
+	}
+	t.Timer++
+	return false
 }
