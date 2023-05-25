@@ -10,17 +10,12 @@ import (
 	"sync/atomic"
 	"time"
 
-<<<<<<< HEAD
 	"github.com/google/uuid"
 	"github.com/sealsee/web-base/public/IOFile"
 	"github.com/sealsee/web-base/public/ds/page"
 	"github.com/sealsee/web-base/public/utils/export/internal"
 	"github.com/xuri/excelize/v2"
 	"go.uber.org/zap"
-=======
-	"github.com/sealsee/web-base/public/utils/export/internal"
-	"github.com/xuri/excelize/v2"
->>>>>>> 5bdef602b133d504be1c935adf21f94b84fc5349
 )
 
 var (
