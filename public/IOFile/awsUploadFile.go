@@ -2,6 +2,7 @@ package IOFile
 
 import (
 	"context"
+	"io"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -29,7 +30,7 @@ func (s *s3IOFile) PublicUploadFile(file *fileParams) (string, error) {
 	return s.domainName + "/" + file.keyName, nil
 }
 
-func (s *s3IOFile) privateUploadFile(file *fileParams) (string, error) {
+func (s *s3IOFile) PrivateUploadFile(file *fileParams) (string, error) {
 	obj := &s3.PutObjectInput{
 		Bucket:      aws.String(s.bucket),
 		Key:         aws.String("private/" + file.keyName),
@@ -46,6 +47,10 @@ func (s *s3IOFile) privateUploadFile(file *fileParams) (string, error) {
 
 func (l *s3IOFile) GetFileFullName(filename string) (string, error) {
 	// TODO
+	return "", nil
+}
+
+func (l *s3IOFile) Upload(data io.Reader, suffixName, fileExt string, isPrivate bool) (string, error) {
 	return "", nil
 }
 

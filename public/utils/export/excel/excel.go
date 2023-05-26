@@ -37,6 +37,7 @@ var (
 type Excel struct {
 }
 
+// Deprecated
 func ExportExcel(dataList [][]interface{}) (data []byte) {
 	f := excelize.NewFile()
 	defer f.Close()
@@ -169,13 +170,16 @@ func _runAsyncExp(task *internal.Task) {
 		}
 	}()
 
-	_, err := _export(task)
+	bs, err := _export(task)
 	if err != nil {
 		zap.L().Error(err.Error())
 	}
-
+	url, err := IOFile.GetConfig().Upload(bytes.NewReader(bs), "", "xlsx", true)
+	if err != nil {
+		zap.L().Error(err.Error())
+	}
 	//TODO
-	task.Handler.Finish("")
+	task.Handler.Finish(url)
 }
 
 func _export(task *internal.Task) ([]byte, error) {

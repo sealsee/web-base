@@ -38,7 +38,7 @@ type Task struct {
 	Expcount   int
 	TotalSize  int
 	CostTime   time.Duration
-	Timer      int //12
+	Timer      int //12c
 }
 
 func (t *Task) TimerAndExpire() bool {

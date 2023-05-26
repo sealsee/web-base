@@ -2,6 +2,8 @@ package IOFile
 
 import (
 	"fmt"
+	"io"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -9,6 +11,7 @@ import (
 	"github.com/sealsee/web-base/public/cst"
 	"github.com/sealsee/web-base/public/setting"
 	"github.com/sealsee/web-base/public/utils/set"
+	"github.com/sealsee/web-base/public/utils/stringUtils"
 	"go.uber.org/zap"
 )
 
@@ -20,9 +23,15 @@ const (
 var FileType = set.Set[string]{}
 
 type IOFile interface {
+	//Deprecated
 	PublicUploadFile(file *fileParams) (string, error)
-	privateUploadFile(file *fileParams) (string, error)
+	//Deprecated
+	PrivateUploadFile(file *fileParams) (string, error)
+	//Deprecated
 	GetFileFullName(filename string) (string, error)
+
+	// fileExt, suffixName should be null
+	Upload(data io.Reader, suffixName, fileExt string, isPrivate bool) (string, error)
 	Download(url string) ([]byte, error)
 }
 
@@ -62,7 +71,24 @@ func Init() {
 		}
 		l.privatePath = priPath
 		ioFile = l
-
-		zap.L().Info(fmt.Sprintf("FileStore[%s] init success...\n", setting.Conf.UploadFile.Type))
 	}
+
+	zap.L().Info(fmt.Sprintf("FileStore[%s] init success...\n", setting.Conf.UploadFile.Type))
+}
+
+func GeneralFileName(suffixName, fileExt string) string {
+	var fileName strings.Builder
+	fileName.WriteString(stringUtils.GetUUID())
+	if suffixName != "" {
+		fileName.WriteString("_")
+		fileName.WriteString(suffixName)
+	}
+	if fileExt != "" {
+		if fileExt[0] != '.' {
+			fileName.WriteString(".")
+		}
+		fileName.WriteString(fileExt)
+	}
+
+	return fileName.String()
 }

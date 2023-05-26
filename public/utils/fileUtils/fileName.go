@@ -35,7 +35,7 @@ var defaultAllowedExtension = []string{
 
 func GetFileNameRandom(userId int64, extensionName string) string {
 	t := time.Now()
-	nameKey := t.Format("06/01/02") + "/" + stringUtils.GetUUID() + "_" + strconv.FormatInt(userId, 10) + "." + extensionName
+	nameKey := t.Format("2006-01-02") + "/" + stringUtils.GetUUID() + "_" + strconv.FormatInt(userId, 10) + "." + extensionName
 	return nameKey
 }
 

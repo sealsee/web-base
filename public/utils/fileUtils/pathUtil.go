@@ -12,7 +12,7 @@ import (
 
 // CreateMutiDir 调用os.MkdirAll递归创建文件夹
 func CreateMutiDir(filePath string) error {
-	if !isExist(filePath) {
+	if !IsExist(filePath) {
 		err := os.MkdirAll(filePath, os.ModePerm)
 		if err != nil {
 			return err
@@ -22,13 +22,10 @@ func CreateMutiDir(filePath string) error {
 }
 
 // 判断所给路径文件/文件夹是否存在(返回true是存在)
-func isExist(path string) bool {
+func IsExist(path string) bool {
 	_, err := os.Stat(path) //os.Stat获取文件信息
 	if err != nil {
-		if os.IsExist(err) {
-			return true
-		}
-		return false
+		return os.IsExist(err)
 	}
 	return true
 }
@@ -41,7 +38,7 @@ func HomePath() (string, error) {
 
 	// cross compile support
 
-	if "windows" == runtime.GOOS {
+	if runtime.GOOS == "windows" {
 		return homeWindows()
 	}
 
