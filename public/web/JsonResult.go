@@ -3,7 +3,9 @@ package web
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
+	"github.com/sealsee/web-base/public/cst/httpStatus"
 	"github.com/sealsee/web-base/public/ds/page"
 
 	"github.com/gin-gonic/gin"
@@ -29,18 +31,21 @@ type JsonResult struct {
 func NewJsonResult(c *gin.Context) *JsonResult {
 	return &JsonResult{
 		Success: true,
+		Code:    strconv.Itoa(int(httpStatus.Success)),
 		Msg:     OK,
 		Data:    make(map[string]interface{}, 1),
 		c:       c}
 }
 
 func (json *JsonResult) SetSysErr() *JsonResult {
+	json.Code = strconv.Itoa(int(httpStatus.Error))
 	json.Msg = ERR
 	json.Success = false
 	return json
 }
 
 func (json *JsonResult) SetErr(err string) *JsonResult {
+	json.Code = strconv.Itoa(int(httpStatus.Error))
 	json.Msg = err
 	json.Success = false
 	return json
@@ -71,7 +76,6 @@ func (json *JsonResult) AddData(key string, ary interface{}) *JsonResult {
 	if key != "" && ary != nil {
 		json.Data[key] = ary
 	}
-
 	return json
 }
 

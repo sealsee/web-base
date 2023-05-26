@@ -2,8 +2,9 @@ package errs
 
 type ERROR [2]string
 
+var UNAUTHORIZED = ERROR{"401", "认证失败"}
+
 var REFUSE_VISIT_ERR = ERROR{"000", "拒绝访问！！!"}
-var USER_UNAUTH_ERR = ERROR{"001", "认证失败！！!"}
 var USER_PASSWORD_ERR = ERROR{"002", "用户不存在/密码错误"}
 var USER_DELETED_ERR = ERROR{"003", "对不起，您的账号：%s 已删除"}
 var USER_DISABLED_ERR = ERROR{"004", "对不起，您的账号：%s 已停用"}

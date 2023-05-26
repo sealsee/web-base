@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/sealsee/web-base/public/cst/httpStatus"
+	"github.com/sealsee/web-base/public/errs"
 	"github.com/sealsee/web-base/public/setting"
 	"github.com/sealsee/web-base/public/utils/sys"
 	"github.com/sealsee/web-base/public/web"
@@ -190,36 +191,48 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 					return
 				}
 
-				params := map[string]any{}
-				if stack {
-					lg.Error("[Recovery from panic]",
-						zap.Any("error", err),
-						zap.String("path", c.Request.URL.Path),
-						zap.String("query", c.Request.URL.RawQuery),
-						zap.String("ip", c.ClientIP()),
-						zap.String("user-agent", c.Request.UserAgent()),
-						zap.String("stack", string(debug.Stack())),
-					)
-					params["error"] = err
-					params["path"] = c.Request.URL.Path
-					params["query"] = err
-					params["ip"] = c.ClientIP()
-					params["user-agent"] = c.Request.UserAgent()
-					params["stack"] = string(debug.Stack())
-
-					if setting.Conf.Mode == "dev" {
-						fmt.Printf("error:%s\n", err)
-						fmt.Println("stack:" + string(debug.Stack()))
-					}
-				} else {
-					lg.Error("[Recovery from panic]",
-						zap.Any("error", err),
-						zap.String("request", string(httpRequest)),
-					)
+				var isBizError bool
+				var errmsg string
+				switch e := err.(type) {
+				case errs.ERROR:
+					isBizError = true
+					errmsg = e[1]
+				default:
+					errmsg = httpStatus.Error.Msg()
 				}
 
-				go ErrLog(params)
-				c.JSON(http.StatusOK, web.JsonResult{Code: fmt.Sprintf("%d", httpStatus.Error), Msg: httpStatus.Error.Msg()})
+				if !isBizError {
+					params := map[string]any{}
+					if stack {
+						lg.Error("[Recovery from panic]",
+							zap.Any("error", err),
+							zap.String("path", c.Request.URL.Path),
+							zap.String("query", c.Request.URL.RawQuery),
+							zap.String("ip", c.ClientIP()),
+							zap.String("user-agent", c.Request.UserAgent()),
+							zap.String("stack", string(debug.Stack())),
+						)
+						params["error"] = err
+						params["path"] = c.Request.URL.Path
+						params["query"] = err
+						params["ip"] = c.ClientIP()
+						params["user-agent"] = c.Request.UserAgent()
+						params["stack"] = string(debug.Stack())
+
+						if setting.Conf.Mode == "dev" {
+							fmt.Printf("error:%s\n", err)
+							fmt.Println("stack:" + string(debug.Stack()))
+						}
+					} else {
+						lg.Error("[Recovery from panic]",
+							zap.Any("error", err),
+							zap.String("request", string(httpRequest)),
+						)
+					}
+					go ErrLog(params)
+				}
+
+				c.JSON(http.StatusOK, web.JsonResult{Code: fmt.Sprintf("%d", httpStatus.Error), Msg: errmsg})
 			}
 		}()
 		c.Next()

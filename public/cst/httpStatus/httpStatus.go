@@ -1,6 +1,6 @@
 package httpStatus
 
-type ResCode int64
+type ResCode int
 
 const (
 	Success      ResCode = 200

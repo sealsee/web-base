@@ -17,13 +17,13 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 		json := web.NewJsonResult(c)
 		authHeader := c.Request.Header.Get("Authorization")
 		if len(authHeader) == 0 {
-			json.SetErrs(errs.USER_UNAUTH_ERR).Render()
+			json.SetErrs(errs.UNAUTHORIZED).Render()
 			c.Abort()
 			return
 		}
 		sessionUser, err := jwt.ParseToken(authHeader)
 		if err != nil {
-			json.SetErrs(errs.USER_UNAUTH_ERR).Render()
+			json.SetErrs(errs.UNAUTHORIZED).Render()
 			c.Abort()
 			return
 		}
