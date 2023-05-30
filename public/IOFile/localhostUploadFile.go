@@ -7,11 +7,10 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/sealsee/web-base/public/cst"
+	"github.com/sealsee/web-base/public/IOFile/cst"
 	"github.com/sealsee/web-base/public/utils/fileUtils"
 	"go.uber.org/zap"
 )
@@ -22,47 +21,13 @@ type localHostIOFile struct {
 	domainName  string
 }
 
-func (l *localHostIOFile) PublicUploadFile(file *fileParams) (string, error) {
-	var b []byte
-	if file.buf == nil {
-		buf := &bytes.Buffer{}
-		_, err := buf.ReadFrom(file.data)
-		if err != nil {
-			return "", err
-		}
-		b = buf.Bytes()
-	} else {
-		b = file.buf.Bytes()
-	}
-	pathAndName := l.publicPath + file.keyName
-	err := fileUtils.CreateMutiDir(filepath.Dir(pathAndName))
-	if err != nil {
-		return "", err
-	}
-	err = os.WriteFile(pathAndName, b, 0664)
-	if err != nil {
-		return "", err
-	}
-	return cst.ResourcePrefix + "/" + file.keyName, nil
+func (l *localHostIOFile) PublicUploadFile(file *FileParams) (string, error) {
+
+	return "", nil
 }
 
-func (l *localHostIOFile) PrivateUploadFile(file *fileParams) (string, error) {
-	buf := &bytes.Buffer{}
-	_, err := buf.ReadFrom(file.data)
-	if err != nil {
-		return "", err
-	}
-	pathAndName := l.privatePath + file.keyName
-	err = fileUtils.CreateMutiDir(filepath.Dir(pathAndName))
-	if err != nil {
-		return "", err
-	}
-	b := buf.Bytes()
-	err = os.WriteFile(pathAndName, b, 0664)
-	if err != nil {
-		return "", err
-	}
-	return file.keyName, nil
+func (l *localHostIOFile) PrivateUploadFile(file *FileParams) (string, error) {
+	return "", nil
 }
 
 func (l *localHostIOFile) GetFileFullName(filename string) (string, error) {
@@ -80,35 +45,43 @@ func (l *localHostIOFile) Upload(data io.Reader, suffixName, fileExt string, isP
 		return "", err
 	}
 
-	var pathBuilder strings.Builder
+	var pathAll strings.Builder
+	var filePath strings.Builder
+	filePath.WriteString(cst.ResourcePrefix)
+	filePath.WriteString("/")
+
 	if isPrivate {
-		pathBuilder.WriteString(l.privatePath)
+		pathAll.WriteString(l.privatePath)
 		if l.privatePath[len(l.privatePath)-1] != '/' {
-			pathBuilder.WriteString("/")
+			pathAll.WriteString("/")
 		}
+
+		filePath.WriteString(cst.PrivateTag)
+		filePath.WriteString("/")
 	} else {
-		pathBuilder.WriteString(l.publicPath)
+		pathAll.WriteString(l.publicPath)
 		if l.publicPath[len(l.publicPath)-1] != '/' {
-			pathBuilder.WriteString("/")
+			pathAll.WriteString("/")
 		}
+
+		filePath.WriteString(cst.PublicTag)
+		filePath.WriteString("/")
 	}
 
 	t := time.Now()
-	pathBuilder.WriteString(t.Format("2006-01-02"))
-	pathBuilder.WriteString("/")
-
-	path := pathBuilder.String()
+	filePath.WriteString(t.Format("2006-01-02"))
+	filePath.WriteString("/")
 	fileName := GeneralFileName(suffixName, fileExt)
-	pathBuilder.WriteString(fileName)
-	filePath := pathBuilder.String()
 
-	err = fileUtils.CreateMutiDir(path)
+	pathAll.WriteString(filePath.String())
+	err = fileUtils.CreateMutiDir(pathAll.String())
 	if err != nil {
 		zap.L().Error(err.Error())
 		return "", err
 	}
 
-	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	pathAll.WriteString(fileName)
+	file, err := os.OpenFile(pathAll.String(), os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		zap.L().Error(err.Error())
 		return "", err
@@ -122,26 +95,45 @@ func (l *localHostIOFile) Upload(data io.Reader, suffixName, fileExt string, isP
 		return "", err
 	}
 
-	return filePath, nil
+	writer.Flush()
+	filePath.WriteString(fileName)
+
+	domain := l.domainName
+	if domain != "" && domain[len(domain)-1] != '/' {
+		l.domainName += "/"
+	}
+
+	return domain + filePath.String(), nil
 }
 
 func (l *localHostIOFile) Download(url string) ([]byte, error) {
-	if url == "" {
+	if url == "" && !strings.HasPrefix(url, "http") {
 		return nil, nil
 	}
 
-	relativePath := url
-	if strings.HasPrefix(url, "http") {
-		idx := strings.Index(url, l.domainName)
-		if idx != -1 {
-			relativePath = url[len(l.domainName):]
-		}
+	filePath := ""
+	if strings.HasPrefix(url, l.domainName) {
+		filePath = url[len(l.domainName):]
 	}
 
-	if !fileUtils.IsExist(relativePath) {
-		return nil, errors.New(url + " is not exist")
+	if filePath == "" {
+		return nil, errors.New(url + " is error")
 	}
-	bytes, err := ioutil.ReadFile(relativePath)
+
+	var pathBulider strings.Builder
+	if idx := strings.Index(filePath, cst.ResourcePrefix+"/"+cst.PublicTag); idx != -1 {
+		pathBulider.WriteString(l.publicPath)
+	} else if idx := strings.Index(filePath, cst.ResourcePrefix+"/"+cst.PrivateTag); idx != -1 {
+		pathBulider.WriteString(l.privatePath)
+	} else {
+		return nil, errors.New(url + " is error")
+	}
+
+	pathBulider.WriteString(filePath)
+	if !fileUtils.IsExist(pathBulider.String()) {
+		return nil, errors.New(pathBulider.String() + " is not exist")
+	}
+	bytes, err := ioutil.ReadFile(pathBulider.String())
 	if err != nil {
 		zap.L().Error(err.Error())
 	}

@@ -8,7 +8,7 @@ import (
 	"github.com/gin-contrib/pprof"
 	_ "github.com/gin-contrib/pprof"
 	"github.com/sealsee/web-base/public/IOFile"
-	"github.com/sealsee/web-base/public/cst"
+	"github.com/sealsee/web-base/public/IOFile/cst"
 	"github.com/sealsee/web-base/public/middlewares"
 	"github.com/sealsee/web-base/public/setting"
 	"github.com/sealsee/web-base/public/utils/logger"
