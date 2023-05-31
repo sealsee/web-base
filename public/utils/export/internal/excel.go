@@ -36,21 +36,6 @@ var (
 type Excel struct {
 }
 
-// Deprecated
-func ExportExcel(dataList [][]interface{}) (data []byte) {
-	f := excelize.NewFile()
-	defer f.Close()
-	for i, row := range dataList {
-		if i == 0 {
-			f.SetSheetRow("Sheet1", "A1", &row)
-		} else {
-			f.SetSheetRow("Sheet1", "A"+strconv.Itoa(i+1), &row)
-		}
-	}
-	buffer, _ := f.WriteToBuffer()
-	return buffer.Bytes()
-}
-
 func (e *Excel) Import(bs []byte, handler ImpHandler) error {
 	if bs == nil || len(bs) <= 0 || handler == nil {
 		return errors.New("params is invalid")
