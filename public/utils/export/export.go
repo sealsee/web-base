@@ -1,13 +1,11 @@
 package export
 
-import (
-	"github.com/sealsee/web-base/public/utils/export/internal"
-)
+import "github.com/sealsee/web-base/public/utils/export/excel"
 
-func Dbf() internal.ImpExp {
+func Dbf() excel.ImpExp {
 	return nil
 }
 
-func Excel() internal.ImpExp {
+func Excel() excel.ImpExp {
 	return &internal.Excel{}
 }
