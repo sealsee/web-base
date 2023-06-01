@@ -71,7 +71,7 @@ func (l *localHostIOFile) Upload(data io.Reader, suffixName, fileExt string, isP
 	t := time.Now()
 	filePath.WriteString(t.Format("2006-01-02"))
 	filePath.WriteString("/")
-	fileName := GeneralFileName(suffixName, fileExt)
+	fileName := generalFileName(suffixName, fileExt)
 
 	pathAll.WriteString(filePath.String())
 	err = fileUtils.CreateMutiDir(pathAll.String())
@@ -100,7 +100,7 @@ func (l *localHostIOFile) Upload(data io.Reader, suffixName, fileExt string, isP
 
 	domain := l.domainName
 	if domain != "" && domain[len(domain)-1] != '/' {
-		l.domainName += "/"
+		domain += "/"
 	}
 
 	return domain + filePath.String(), nil

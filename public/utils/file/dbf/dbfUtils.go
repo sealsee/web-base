@@ -1,6 +1,6 @@
 package dbf
 
-import "github.com/sealsee/web-base/public/utils/export/dbf/godbf"
+import "github.com/sealsee/web-base/public/utils/file/dbf/godbf"
 
 func SetRows(rows [][]string) (data []byte) {
 

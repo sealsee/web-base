@@ -49,8 +49,7 @@ func NewFileParamsNameBuffer(keyName string, buf *bytes.Buffer) *FileParams {
 	return f
 }
 
-// Deprecated
-func GeneralFileName(suffixName, fileExt string) string {
+func generalFileName(suffixName, fileExt string) string {
 	var fileName strings.Builder
 	fileName.WriteString(stringUtils.GetUUID())
 	if suffixName != "" {

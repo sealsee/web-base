@@ -42,7 +42,7 @@ func (oss *ossIOFile) Upload(data io.Reader, suffixName, fileExt string, isPriva
 	pathBuilder.WriteString(t.Format("2006-01-02"))
 	pathBuilder.WriteString("/")
 
-	fileName := GeneralFileName(suffixName, fileExt)
+	fileName := generalFileName(suffixName, fileExt)
 	pathBuilder.WriteString(fileName)
 
 	err = bucket.PutObject(pathBuilder.String(), data)

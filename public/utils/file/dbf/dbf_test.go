@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/sealsee/web-base/public/utils/export/dbf/godbf"
+	"github.com/sealsee/web-base/public/utils/file/dbf/godbf"
 )
 
 func TestRowData(t *testing.T) {

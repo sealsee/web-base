@@ -1,4 +1,4 @@
-package internal
+package excel
 
 import (
 	"bytes"
@@ -13,7 +13,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/sealsee/web-base/public/IOFile"
 	"github.com/sealsee/web-base/public/ds/page"
-	"github.com/sealsee/web-base/public/utils/export/excel"
 	"github.com/xuri/excelize/v2"
 	"go.uber.org/zap"
 )
@@ -34,25 +33,10 @@ var (
 // 	}
 // }
 
-type Excel struct {
+type excel struct {
 }
 
-// Deprecated
-func ExportExcel(dataList [][]interface{}) (data []byte) {
-	f := excelize.NewFile()
-	defer f.Close()
-	for i, row := range dataList {
-		if i == 0 {
-			f.SetSheetRow("Sheet1", "A1", &row)
-		} else {
-			f.SetSheetRow("Sheet1", "A"+strconv.Itoa(i+1), &row)
-		}
-	}
-	buffer, _ := f.WriteToBuffer()
-	return buffer.Bytes()
-}
-
-func (e *Excel) Import(bs []byte, handler excel.ImpHandler) error {
+func (e *excel) Import(bs []byte, handler ImpHandler) error {
 	if bs == nil || len(bs) <= 0 || handler == nil {
 		return errors.New("params is invalid")
 	}
@@ -102,22 +86,22 @@ func (e *Excel) Import(bs []byte, handler excel.ImpHandler) error {
 	return nil
 }
 
-func (e *Excel) ImportWithUrl(url string, handler excel.ImpHandler) error {
+func (e *excel) ImportWithUrl(url string, handler ImpHandler) error {
 	if url == "" || handler == nil {
 		return errors.New("params is invalid")
 	}
 	bytes, err := IOFile.GetConfig().Download(url)
 	if err != nil {
-		return errors.New("download with url err")
+		return errors.New("download with " + url + " err")
 	}
 	return e.Import(bytes, handler)
 }
 
-func (e *Excel) ExportSync(handler excel.ExpHandler) ([]byte, error) {
-	return _export(&excel.Task{Handler: handler})
+func (e *excel) ExportSync(handler ExpHandler) ([]byte, error) {
+	return _export(&Task{Handler: handler})
 }
 
-func (e *Excel) ExportAsync(handler excel.ExpHandler) (string, error) {
+func (e *excel) ExportAsync(handler ExpHandler) (string, error) {
 	if handler == nil || handler.HeaderColumn() == nil || len(handler.HeaderColumn()) < 1 {
 		return "", errors.New("invalid params")
 	}
@@ -136,7 +120,7 @@ func (e *Excel) ExportAsync(handler excel.ExpHandler) (string, error) {
 				if !ok {
 					continue
 				}
-				t, _ := v.(*excel.Task)
+				t, _ := v.(*Task)
 				start := time.Now()
 				_runAsyncExp(t)
 				cost := time.Since(start)
@@ -149,9 +133,9 @@ func (e *Excel) ExportAsync(handler excel.ExpHandler) (string, error) {
 				ticker := time.NewTicker(time.Second * 5)
 				<-ticker.C
 				tasks_entry.Range(func(key, value any) bool {
-					t, _ := value.(*excel.Task)
+					t, _ := value.(*Task)
 					// fmt.Println(key, "----process:", t.Process, t.Expcount, t.TotalSize, t.CostTime)
-					if t.TimerAndExpire() {
+					if t.timerAndExpire() {
 						tasks_entry.Delete(t.TaskId)
 					}
 					return true
@@ -163,7 +147,7 @@ func (e *Excel) ExportAsync(handler excel.ExpHandler) (string, error) {
 	return tid, nil
 }
 
-func _runAsyncExp(task *excel.Task) {
+func _runAsyncExp(task *Task) {
 	defer func() {
 		if err := recover(); err != nil {
 			zap.L().Error("", zap.Any("", err))
@@ -182,7 +166,7 @@ func _runAsyncExp(task *excel.Task) {
 	task.Handler.Finish(url)
 }
 
-func _export(task *excel.Task) ([]byte, error) {
+func _export(task *Task) ([]byte, error) {
 	handler := task.Handler
 	sheetName := "Sheet1"
 	file := excelize.NewFile()
@@ -241,7 +225,7 @@ func _export(task *excel.Task) ([]byte, error) {
 	return buf.Bytes(), err
 }
 
-func (e *Excel) GetProcess(taskid string) float32 {
+func (e *excel) GetProcess(taskid string) float32 {
 	if taskid == "" {
 		return 0
 	}
@@ -249,7 +233,7 @@ func (e *Excel) GetProcess(taskid string) float32 {
 	if !ok {
 		return 100
 	}
-	t, _ := value.(*excel.Task)
+	t, _ := value.(*Task)
 	return t.Process
 }
 
@@ -291,15 +275,19 @@ func _headerColumn(fs []string) ([]string, []string) {
 	return headers, cols
 }
 
-func _addTask(handler excel.ExpHandler) (string, error) {
+func _addTask(handler ExpHandler) (string, error) {
 	u := uuid.New()
 	id := strconv.Itoa((int(u.ID())))
 	select {
 	case tasks <- id:
-		tasks_entry.Store(id, &excel.Task{TaskId: id, Title: handler.Title(), Handler: handler, AddTime: time.Now()})
+		tasks_entry.Store(id, &Task{TaskId: id, Title: handler.Title(), Handler: handler, AddTime: time.Now()})
 		return fmt.Sprint(id), nil
 	default:
 		zap.L().Error("export task is full")
 		return "", errors.New("export task is full")
 	}
+}
+
+func GetExcelTask() sync.Map {
+	return tasks_entry
 }

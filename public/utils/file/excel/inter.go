@@ -41,7 +41,7 @@ type Task struct {
 	Timer      int //12c
 }
 
-func (t *Task) TimerAndExpire() bool {
+func (t *Task) timerAndExpire() bool {
 	if t.Timer >= 11 {
 		return true
 	}

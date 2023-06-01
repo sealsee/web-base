@@ -47,7 +47,9 @@ func Init() {
 	var core zapcore.Core
 	if setting.Conf.Mode == "dev" {
 		// 进入开发模式，日志输出到终端
-		consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
+		encoderConfig := zap.NewDevelopmentEncoderConfig()
+		encoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
+		consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig)
 		core = zapcore.NewTee(
 			zapcore.NewCore(encoder, writeSyncer, level),
 			zapcore.NewCore(consoleEncoder, zapcore.Lock(os.Stdout), zapcore.DebugLevel),
@@ -63,9 +65,9 @@ func Init() {
 
 func getEncoder() zapcore.Encoder {
 	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	encoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
 	encoderConfig.TimeKey = "time"
-	encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 	encoderConfig.EncodeDuration = zapcore.SecondsDurationEncoder
 	encoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
 	return zapcore.NewJSONEncoder(encoderConfig)
