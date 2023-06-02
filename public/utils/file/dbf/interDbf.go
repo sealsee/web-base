@@ -21,6 +21,38 @@ const (
 type dbf struct {
 }
 
+func (d *dbf) GetHeaders(arg any) ([]string, error) {
+	if arg == nil {
+		return nil, nil
+	}
+
+	var bs []byte
+	switch x := arg.(type) {
+	case string:
+		b, err := IOFile.GetConfig().Download(x)
+		if err != nil {
+			return nil, errors.New("download with " + x + " err")
+		}
+		bs = b
+	case []byte:
+		bs = x
+	default:
+		return nil, errors.New("arg is invalid,need url or []byte")
+	}
+
+	dbfTable, err := godbf.NewFromByteArray(bs, fileEncoding)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, err
+	}
+
+	fieldNames := dbfTable.FieldNames()
+	if fieldNames == nil || len(fieldNames) <= 0 {
+		return nil, errors.New("fieldNames invalid")
+	}
+	return nil, nil
+}
+
 func (d *dbf) Import(bytes []byte, handler ImpHandler) error {
 	if bytes == nil || handler == nil {
 		return errors.New("params is invalid")

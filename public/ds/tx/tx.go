@@ -13,11 +13,13 @@ func Init(d *sqlx.DB) {
 	db = d
 }
 
+// Deprecated
 type Tx interface {
 	NamedExec(query string, arg interface{}) (sql.Result, error)
 	Exec(query string, args ...any) (sql.Result, error)
 }
 
+// Deprecated
 func ExecTx(exec func(Tx)) bool {
 	tx, err := db.Beginx()
 	if err != nil {

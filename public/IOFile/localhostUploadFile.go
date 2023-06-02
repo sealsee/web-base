@@ -21,23 +21,6 @@ type localHostIOFile struct {
 	domainName  string
 }
 
-func (l *localHostIOFile) PublicUploadFile(file *FileParams) (string, error) {
-
-	return "", nil
-}
-
-func (l *localHostIOFile) PrivateUploadFile(file *FileParams) (string, error) {
-	return "", nil
-}
-
-func (l *localHostIOFile) GetFileFullName(filename string) (string, error) {
-	if !strings.HasPrefix(filename, cst.ResourcePrefix+"/") {
-		return "", errors.New("wrong path! should prefix with '/profile/'")
-	}
-	keyName := strings.Replace(filename, cst.ResourcePrefix+"/", "", 1)
-	return l.publicPath + keyName, nil
-}
-
 func (l *localHostIOFile) Upload(data io.Reader, suffixName, fileExt string, isPrivate bool) (string, error) {
 	buf := bytes.Buffer{}
 	_, err := buf.ReadFrom(data)

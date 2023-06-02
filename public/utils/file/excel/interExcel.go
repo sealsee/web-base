@@ -36,6 +36,45 @@ var (
 type excel struct {
 }
 
+func (e *excel) GetHeaders(arg any) ([]string, error) {
+	if arg == nil {
+		return nil, nil
+	}
+
+	var bs []byte
+	switch x := arg.(type) {
+	case string:
+		b, err := IOFile.GetConfig().Download(x)
+		if err != nil {
+			return nil, errors.New("download with " + x + " err")
+		}
+		bs = b
+	case []byte:
+		bs = x
+	default:
+		return nil, errors.New("arg is invalid,need url or []byte")
+	}
+
+	file, err := excelize.OpenReader(bytes.NewReader(bs))
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	defSheet := file.GetSheetList()[0]
+	if defSheet == "" {
+		zap.L().Error("no sheet default")
+		return nil, errors.New("no sheet default")
+	}
+
+	rows, _ := file.Rows(defSheet)
+	if rows.Next() {
+		return rows.Columns()
+	}
+
+	return nil, nil
+}
+
 func (e *excel) Import(bs []byte, handler ImpHandler) error {
 	if bs == nil || len(bs) <= 0 || handler == nil {
 		return errors.New("params is invalid")

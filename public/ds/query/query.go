@@ -140,7 +140,7 @@ func ExecQueryListWithColumns[T any](columns []string, where basemodel.IQuery, q
 	return ts
 }
 
-// 废弃
+// Deprecated
 func HandListPageQuery[T any](db *sqlx.DB, query string, args interface{}, page *page.Page) (list []*T) {
 	//sql := strings.ToUpper(query)
 	countRow, err := db.NamedQuery("SELECT COUNT(*) "+query[strings.Index(query, " FROM "):], args)

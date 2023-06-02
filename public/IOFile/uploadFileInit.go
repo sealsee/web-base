@@ -23,13 +23,6 @@ const (
 var FileType = set.Set[string]{}
 
 type IOFile interface {
-	//Deprecated
-	PublicUploadFile(file *FileParams) (string, error)
-	//Deprecated
-	PrivateUploadFile(file *FileParams) (string, error)
-	//Deprecated
-	GetFileFullName(filename string) (string, error)
-
 	// fileExt, suffixName should be null
 	Upload(data io.Reader, suffixName, fileExt string, isPrivate bool) (string, error)
 	Download(url string) ([]byte, error)
@@ -50,7 +43,6 @@ func Init() {
 			Credentials: credentials.NewStaticCredentialsProvider(setting.Conf.UploadFile.S3.AccessKeyId, setting.Conf.UploadFile.S3.SecretAccessKey, ""),
 			Region:      setting.Conf.UploadFile.S3.Region,
 		}
-
 		s := new(s3IOFile)
 		s.s3Config = s3.NewFromConfig(config)
 		s.bucket = setting.Conf.UploadFile.S3.BucketName

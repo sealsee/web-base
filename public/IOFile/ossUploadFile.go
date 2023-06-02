@@ -101,7 +101,3 @@ func (oss *ossIOFile) Download(url string) ([]byte, error) {
 	}
 	return buf.Bytes(), nil
 }
-
-func (oss *ossIOFile) PublicUploadFile(file *FileParams) (string, error)  { return "", nil }
-func (oss *ossIOFile) PrivateUploadFile(file *FileParams) (string, error) { return "", nil }
-func (oss *ossIOFile) GetFileFullName(filename string) (string, error)    { return "", nil }

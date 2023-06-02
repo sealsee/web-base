@@ -1,8 +1,11 @@
 package context
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gogf/gf/util/gconv"
+	"github.com/mssola/user_agent"
 	"github.com/sealsee/web-base/public/cst"
 )
 
@@ -37,34 +40,35 @@ func (uc *UserContext) GetUserId() int64 {
 	return user.UserId
 }
 
+func (uc *UserContext) GetUserAgent() *user_agent.UserAgent {
+	ua := user_agent.New(uc.Request.Header.Get("User-Agent"))
+	//uc.ClientIP()
+	//ua.OS()
+	//ipUtils.GetRealAddressByIP(ip)
+	//ua.Browser()
+	return ua
+}
+
+func (uc *UserContext) ParamInt64(key string) int64 {
+	return gconv.Int64(uc.Param(key))
+}
+
+func (uc *UserContext) ParamInt64Array(key string) []int64 {
+	return gconv.Int64s(strings.Split(uc.Param(key), ","))
+}
+
+func (uc *UserContext) ParamStringArray(key string) []string {
+	return strings.Split(uc.Param(key), ",")
+}
+
 func (uc *UserContext) QueryInt64(key string) int64 {
 	return gconv.Int64(uc.Query(key))
 }
 
-// func (uc *UserContext) SetUserAgent(login *monitorModels.Logininfor) {
-// 	login.InfoId = snowflake.GenID()
-// 	ua := user_agent.New(uc.Request.Header.Get("User-Agent"))
-// 	ip := uc.ClientIP()
-// 	login.IpAddr = ip
-// 	login.Os = ua.OS()
-// 	login.LoginLocation = ipUtils.GetRealAddressByIP(ip)
-// 	login.Browser, _ = ua.Browser()
-// }
+func (uc *UserContext) QueryInt64Array(key string) []int64 {
+	return gconv.Int64s(strings.Split(uc.Query(key), ","))
+}
 
-// func (bzc *UserContext) ParamInt64(key string) int64 {
-// 	return gconv.Int64(bzc.Param(key))
-// }
-// func (bzc *UserContext) ParamInt64Array(key string) []int64 {
-// 	return gconv.Int64s(strings.Split(bzc.Param(key), ","))
-// }
-// func (bzc *UserContext) ParamStringArray(key string) []string {
-// 	return strings.Split(bzc.Param(key), ",")
-// }
-
-// func (bzc *UserContext) QueryInt64(key string) int64 {
-// 	return gconv.Int64(bzc.Query(key))
-// }
-// func (bzc *UserContext) QueryInt64Array(key string) []int64 {
-// 	return gconv.Int64s(strings.Split(bzc.Query(key), ","))
-
-// }
+func (uc *UserContext) QueryStringArray(key string) []string {
+	return strings.Split(uc.Query(key), ",")
+}

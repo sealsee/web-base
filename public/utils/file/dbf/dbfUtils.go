@@ -2,6 +2,7 @@ package dbf
 
 import "github.com/sealsee/web-base/public/utils/file/dbf/godbf"
 
+// Deprecated
 func SetRows(rows [][]string) (data []byte) {
 
 	dbfTable := godbf.New("GBK")
@@ -25,6 +26,7 @@ func SetRows(rows [][]string) (data []byte) {
 	return godbf.GetDbfFileData(dbfTable)
 }
 
+// Deprecated
 func ExportDBF(rows [][]string) (data []byte) {
 	dbfTable := godbf.New("GBK")
 

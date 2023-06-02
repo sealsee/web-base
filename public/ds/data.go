@@ -156,6 +156,7 @@ func newMasterDB(master *setting.Master) *sqlx.DB {
 	return masterDb
 }
 
+// Deprecated
 func newSlaveDB(slave *setting.Slave) []*sqlx.DB {
 	count := slave.Count
 	var slaveDb []*sqlx.DB

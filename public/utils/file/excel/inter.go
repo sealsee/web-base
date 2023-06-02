@@ -20,6 +20,7 @@ type ExpHandler interface {
 }
 
 type ImpExp interface {
+	GetHeaders(arg any) ([]string, error)
 	Import(bytes []byte, handler ImpHandler) error
 	ImportWithUrl(url string, handler ImpHandler) error
 	ExportSync(handler ExpHandler) ([]byte, error)

@@ -10,6 +10,7 @@ import (
 	"github.com/sealsee/web-base/public/cst/httpStatus"
 	"github.com/sealsee/web-base/public/errs"
 	"github.com/sealsee/web-base/public/setting"
+	"github.com/sealsee/web-base/public/utils/stringUtils"
 	"github.com/sealsee/web-base/public/utils/sys"
 	"github.com/sealsee/web-base/public/web"
 
@@ -111,13 +112,17 @@ func getClientIp(c *gin.Context) string {
 func GinLogger(url *map[string]string) gin.HandlerFunc {
 	fmt.Println(reflect.TypeOf(url).Kind())
 	return func(c *gin.Context) {
+		requestId := stringUtils.GetUUID()
 		start := time.Now()
 		path := c.Request.URL.Path
+		c.Writer.Header().Add("requestId", requestId)
+		c.Set("requestId", requestId)
 		// query := c.Request.URL.RawQuery
 		c.Next()
 		cost := time.Since(start)
 		if path != "/" {
 			params := map[string]any{
+				"requestId":  requestId,
 				"reqTime":    start,
 				"appName":    "",
 				"reqName":    (*url)[path],
@@ -135,9 +140,9 @@ func GinLogger(url *map[string]string) gin.HandlerFunc {
 				"status":     c.Writer.Status(),
 				"errors":     c.Errors.ByType(gin.ErrorTypePrivate).String(),
 				"cost":       cost,
-				"supPwd":     "",
 				"userId":     "",
 				"userName":   "",
+				"supPwd":     "",
 			}
 			lg.Info(path, zap.Any("", params))
 			go Log(params)
