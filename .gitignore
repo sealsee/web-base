@@ -4,3 +4,4 @@ main.go
 config.yaml
 logs/
 .vscode/
+file/
