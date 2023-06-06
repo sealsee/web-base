@@ -6,11 +6,19 @@ import (
 
 	"github.com/sealsee/web-base/public/IOFile"
 	"github.com/sealsee/web-base/public/ds"
+	"github.com/sealsee/web-base/public/middlewares"
 	"github.com/sealsee/web-base/public/route"
 	"github.com/sealsee/web-base/public/setting"
 	"github.com/sealsee/web-base/public/utils"
 	"github.com/sealsee/web-base/public/utils/logger"
 )
+
+var appPlugin *AppPlugin
+
+type AppPlugin struct {
+	LogStore  logger.ILogStore            //日志
+	CheckPriv middlewares.ICheckPrivilege //权限
+}
 
 func init() {
 	configPath := "./config/config.yaml"
@@ -32,9 +40,28 @@ func initCompent(settingds *setting.Datasource) func() {
 	return func() { cleanup() }
 }
 
+func initPlugin() {
+	if appPlugin == nil {
+		return
+	}
+
+	if appPlugin.LogStore != nil {
+		logger.ConfigStore(appPlugin.LogStore)
+	}
+
+	if appPlugin.CheckPriv != nil {
+		middlewares.SetCheckPrivilege(appPlugin.CheckPriv)
+	}
+}
+
+func RunBefore(plugin *AppPlugin) {
+	appPlugin = plugin
+}
+
 func Run() {
 	cleanup := initCompent(setting.Conf.Datasource)
 	defer cleanup()
+	initPlugin()
 	engine := route.RegisterServer()
 	engine.Run(fmt.Sprintf(":%d", setting.Conf.Port))
 }

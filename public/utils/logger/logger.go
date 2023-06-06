@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 
 	"net/http"
 
+	"github.com/sealsee/web-base/public/context"
 	"github.com/sealsee/web-base/public/cst/httpStatus"
 	"github.com/sealsee/web-base/public/errs"
 	"github.com/sealsee/web-base/public/setting"
@@ -120,6 +122,13 @@ func GinLogger(url *map[string]string) gin.HandlerFunc {
 		// query := c.Request.URL.RawQuery
 		c.Next()
 		cost := time.Since(start)
+
+		var userId, userName string
+		user := context.NewUserContext(c).GetUser()
+		if user != nil {
+			userId = strconv.FormatInt(user.UserId, 10)
+			userName = user.UserName
+		}
 		if path != "/" {
 			params := map[string]any{
 				"requestId":  requestId,
@@ -140,11 +149,10 @@ func GinLogger(url *map[string]string) gin.HandlerFunc {
 				"status":     c.Writer.Status(),
 				"errors":     c.Errors.ByType(gin.ErrorTypePrivate).String(),
 				"cost":       cost,
-				"userId":     "",
-				"userName":   "",
-				"supPwd":     "",
+				"userId":     userId,
+				"userName":   userName,
 			}
-			lg.Info(path, zap.Any("", params))
+			lg.Info(path, zap.Any("-", params))
 			go Log(params)
 			// lg.Info(path,
 			// 	zap.Time("reqTime", start),

@@ -47,7 +47,7 @@ func RegisterServer() *gin.Engine {
 		initRoutes(group, false)
 	}
 	//做鉴权的
-	group.Use(middlewares.JWTAuthMiddleware())
+	group.Use(middlewares.JWTAuthMiddleware(), middlewares.PrivilegeMiddleware())
 	{
 		initRoutes(group, true)
 	}
