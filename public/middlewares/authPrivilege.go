@@ -10,7 +10,7 @@ import (
 var cp ICheckPrivilege
 
 type ICheckPrivilege interface {
-	check(path string, loginUser *context.SessionUser) bool
+	Check(path string, loginUser *context.SessionUser) bool
 }
 
 func SetCheckPrivilege(check ICheckPrivilege) {
@@ -28,7 +28,7 @@ func PrivilegeMiddleware() func(c *gin.Context) {
 		if cp == nil {
 			return
 		}
-		if cp.check(path, user) {
+		if cp.Check(path, user) {
 			c.Next()
 		} else {
 			json := web.NewJsonResult(c)
