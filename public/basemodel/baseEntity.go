@@ -87,5 +87,5 @@ func (p *BaseEntityQuery) LikeR(colum string) string {
 
 // 全LIKE %?%
 func (p *BaseEntityQuery) LikeA(colum string) string {
-	return colum + "%"
+	return "%" + colum + "%"
 }
