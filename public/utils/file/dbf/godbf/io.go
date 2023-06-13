@@ -52,6 +52,8 @@ func SaveToFile(dt *DbfTable, filename string) (saveErr error) {
 		}
 	}()
 
+	// when create file, then add the eofMarker.
+	dt.dataStore = append(dt.dataStore, dt.eofMarker)
 	writeErr := writeContent(dt, f)
 	if writeErr != nil {
 		return writeErr

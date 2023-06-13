@@ -181,7 +181,7 @@ func New(encoding string) (table *DbfTable) {
 
 	dt.updateHeader()
 	// no records as yet
-	dt.dataStore = append(dt.dataStore, dt.eofMarker)
+	// dt.dataStore = append(dt.dataStore, dt.eofMarker) // move to SaveToFile() // when create file, then add the eofMarker.
 
 	return dt
 }

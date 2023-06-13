@@ -10,7 +10,7 @@ import (
 func TestRowData(t *testing.T) {
 
 	rows := make([][]string, 0, 3)
-	row1 := []string{"岗位编码", "岗位名称", "状态"}
+	row1 := []string{"code", "name", "state"}
 	row2 := []string{"101", "技术", "正常"}
 	row3 := []string{"102", "运营", "正常"}
 
@@ -19,10 +19,8 @@ func TestRowData(t *testing.T) {
 	// 写入dbf文件
 	dbfTable := godbf.New("GBK")
 
-	fields := rows[0]
-
 	// 生成表头fields
-	for _, field := range fields {
+	for _, field := range rows[0] {
 		dbfTable.AddTextField(field, 32)
 	}
 
@@ -35,14 +33,21 @@ func TestRowData(t *testing.T) {
 		}
 	}
 
-	// 读取dbf文件，取值验证
-	dataList := make([][]string, dbfTable.NumberOfRecords())
+	godbf.SaveToFile(dbfTable, "./test.dbf")
 
-	for i := 0; i < dbfTable.NumberOfRecords(); i++ {
+	readDbfTable, err := godbf.NewFromFile("./test.dbf", "GBK")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// 读取dbf文件，取值验证
+	dataList := make([][]string, readDbfTable.NumberOfRecords())
+
+	for i := 0; i < readDbfTable.NumberOfRecords(); i++ {
 		dataList[i] = make([]string, 3)
-		dataList[i][0] = dbfTable.FieldValue(i, 0)
-		dataList[i][1] = dbfTable.FieldValue(i, 1)
-		dataList[i][2] = dbfTable.FieldValue(i, 2)
+		dataList[i][0] = readDbfTable.FieldValue(i, 0)
+		dataList[i][1] = readDbfTable.FieldValue(i, 1)
+		dataList[i][2] = readDbfTable.FieldValue(i, 2)
 	}
 
 	fmt.Println(dataList)
