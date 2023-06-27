@@ -117,7 +117,10 @@ func (e *excel) Import(bs []byte, handler ImpHandler) error {
 			header := headerMap[j]
 			row[header] = v
 		}
-		handler.Row(&row)
+		status := handler.Row(&row)
+		if status == Exit {
+			break
+		}
 		rowIdx++
 	}
 

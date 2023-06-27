@@ -6,9 +6,16 @@ import (
 	"github.com/sealsee/web-base/public/ds/page"
 )
 
+type RunStatus int
+
+const (
+	Next RunStatus = 1 //下一个
+	Exit RunStatus = 2 //退出
+)
+
 type ImpHandler interface {
 	Headers([]string)
-	Row(*map[string]string)
+	Row(*map[string]string) RunStatus
 	After()
 }
 
