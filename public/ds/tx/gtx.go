@@ -1,6 +1,7 @@
 package tx
 
 import (
+	"errors"
 	"fmt"
 
 	"go.uber.org/zap"
@@ -24,18 +25,33 @@ type GTx interface {
 	Model(value interface{}) (tx *gorm.DB)
 }
 
-func ExecGTx(exec func(GTx)) bool {
+func ExecGTx(exec interface{}) bool {
+	if exec == nil {
+		return false
+	}
+
 	err := gormdb.Transaction(func(tx *gorm.DB) error {
 		defer func() {
 			if err := recover(); err != nil {
 				tx.Rollback()
-				zap.L().Error("执行失败", zap.Any("-", err))
 				fmt.Println(err)
-				// panic(err)
 			}
 		}()
 
-		exec(tx)
+		switch fn := exec.(type) {
+		case func(GTx):
+			fn(tx)
+		case func(GTx) bool:
+			rlt := fn(tx)
+			if !rlt {
+				tx.Rollback()
+				zap.L().Error("手动事务回滚")
+				return errors.New("手动事务回滚")
+			}
+		default:
+			panic(errors.New("param is invalid fun"))
+		}
+
 		return nil
 	})
 
