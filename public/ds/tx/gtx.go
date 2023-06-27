@@ -21,6 +21,7 @@ type GTx interface {
 	Where(query interface{}, args ...interface{}) (tx *gorm.DB)
 	Raw(sql string, values ...interface{}) (tx *gorm.DB)
 	Exec(sql string, values ...interface{}) (tx *gorm.DB)
+	Model(value interface{}) (tx *gorm.DB)
 }
 
 func ExecGTx(exec func(GTx)) bool {
