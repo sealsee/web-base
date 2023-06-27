@@ -101,8 +101,16 @@ func (g *groupTable) AddGETHandel(pattern string, action func(*gin.Context), nee
 	return g.AddHandel(GET, pattern, action, needLogin, mark)
 }
 
+func (g *groupTable) AddGETHandelWithLogin(pattern string, action func(*gin.Context), mark string) *groupTable {
+	return g.AddHandel(GET, pattern, action, true, mark)
+}
+
 func (g *groupTable) AddPOSTHandel(pattern string, action func(*gin.Context), needLogin bool, mark string) *groupTable {
 	return g.AddHandel(POST, pattern, action, needLogin, mark)
+}
+
+func (g *groupTable) AddPOSTHandelWithLogin(pattern string, action func(*gin.Context), mark string) *groupTable {
+	return g.AddHandel(POST, pattern, action, true, mark)
 }
 
 func GetUrlMark(url string) string {
