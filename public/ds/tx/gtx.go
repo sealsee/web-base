@@ -23,6 +23,7 @@ type GTx interface {
 	Raw(sql string, values ...interface{}) (tx *gorm.DB)
 	Exec(sql string, values ...interface{}) (tx *gorm.DB)
 	Model(value interface{}) (tx *gorm.DB)
+	Omit(columns ...string) (tx *gorm.DB)
 }
 
 func ExecGTx(exec interface{}) bool {
