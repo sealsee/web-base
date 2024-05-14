@@ -109,6 +109,9 @@ func (e *excel) Import(bs []byte, handler ImpHandler) error {
 	rowIdx := 1
 	for rows.Next() {
 		cols, _ := rows.Columns()
+		if len(cols) < 1 {
+			continue
+		}
 		j := 0
 		row := map[string]string{}
 		row[id] = strconv.Itoa(rowIdx)
