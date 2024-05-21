@@ -4,11 +4,30 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/sealsee/web-base/public/basemodel"
+	"github.com/sealsee/web-base/public/utils/jsonUtils"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 var gormdb *gorm.DB
+
+type Db struct {
+	*gorm.DB
+}
+
+func (db *Db) UpdatesNew(uWhere interface{}, uData basemodel.IEntidy) (tx *gorm.DB) {
+	dataMap := jsonUtils.StructToMapWithKeyUnderLine(uData)
+	// fmt.Printf("---> uData map: %v \n", dataMap)
+	for _, col := range uData.GetToNullCols() {
+		if _, ok := dataMap[col]; ok && dataMap[col] != "" {
+			continue
+		}
+		dataMap[col] = nil
+	}
+	// fmt.Printf("---> dataMap: %v \n", dataMap)
+	return db.Model(&uWhere).Where(uWhere).Updates(dataMap)
+}
 
 func InitGTx(gdb *gorm.DB) {
 	gormdb = gdb
@@ -39,11 +58,12 @@ func ExecGTx(exec interface{}) bool {
 			}
 		}()
 
+		db := Db{tx}
 		switch fn := exec.(type) {
-		case func(GTx):
-			fn(tx)
-		case func(GTx) bool:
-			rlt := fn(tx)
+		case func(Db):
+			fn(db)
+		case func(Db) bool:
+			rlt := fn(db)
 			if !rlt {
 				tx.Rollback()
 				zap.L().Error("手动事务回滚")

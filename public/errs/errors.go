@@ -1,6 +1,16 @@
 package errs
 
+import "fmt"
+
 type ERROR [2]string
+
+func (e ERROR) Invalid() bool {
+	return len(e) > 0
+}
+
+func (e ERROR) String() string {
+	return fmt.Sprintf("%v-%v", e[0], e[1])
+}
 
 var (
 	UNAUTHORIZED = ERROR{"401", "认证失败"}

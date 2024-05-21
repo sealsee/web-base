@@ -10,21 +10,34 @@ import (
 
 type IQuery interface {
 	GetOrders() string
+	GetConditions() ([]string, string, []interface{})
+}
+
+type IEntidy interface {
+	GetToNullCols() []string
+}
+
+type Entity struct {
+	Deleted int `json:"-"`
 }
 
 type BaseEntity struct {
-	Deleted    int      `json:"-"`
 	CreateBy   int64    `json:"createBy,string,omitempty"` //创建人
 	CreateTime BaseTime `json:"createTime,omitempty"`      //创建时间
 	UpdateBy   int64    `json:"updateBy,string,omitempty"` //修改人
 	UpdateTime BaseTime `json:"updateTime,omitempty"`      //修改时间
+	Entity
+	toNullCols []string `gorm:"-" json:"-"` //更新时需要置空的字段列表
 }
 
 type BaseEntityQuery struct {
-	Deleted  int      `json:"-"`
-	CurPage  int      `gorm:"-" form:"curPage" json:"curPage,omitempty"`   //第几页
-	PageSize int      `gorm:"-" form:"pageSize" json:"pageSize,omitempty"` //数量
-	orders   []string `gorm:"-" json:"-"`
+	CurPage  int `gorm:"-" form:"curPage" json:"curPage,omitempty"`   //第几页
+	PageSize int `gorm:"-" form:"pageSize" json:"pageSize,omitempty"` //数量
+	Entity
+	orders    []string      `gorm:"-" json:"-"`
+	whereCols []string      `gorm:"-" json:"-"` // 扩展条件字段名
+	whereCond []string      `gorm:"-" json:"-"` // 扩展条件内容
+	condVals  []interface{} `gorm:"-" json:"-"` // 扩展条件值
 }
 
 func (p *BaseEntity) SetCreateBy(createBy int64) {
@@ -41,6 +54,14 @@ func (p *BaseEntity) SetDeleteBy(deleteBy int64) {
 	p.Deleted = common.Deleted
 	p.UpdateBy = deleteBy
 	p.UpdateTime = BaseTime(time.Now())
+}
+
+func (p *BaseEntity) SetNullableCols(cols ...string) {
+	p.toNullCols = append(p.toNullCols, cols...)
+}
+
+func (p *BaseEntity) GetToNullCols() []string {
+	return p.toNullCols
 }
 
 func (p *BaseEntityQuery) GetPage() *page.Page {
@@ -76,16 +97,56 @@ func (p *BaseEntityQuery) GetOrders() string {
 }
 
 // 左LIKE %?
-func (p *BaseEntityQuery) LikeL(colum string) string {
+func (p *BaseEntityQuery) likeL(colum string) string {
+	if len(strings.TrimSpace(colum)) == 0 {
+		return ""
+	}
 	return "%" + colum
 }
 
 // 右LIKE ?%
-func (p *BaseEntityQuery) LikeR(colum string) string {
+func (p *BaseEntityQuery) likeR(colum string) string {
+	if len(strings.TrimSpace(colum)) == 0 {
+		return ""
+	}
 	return colum + "%"
 }
 
 // 全LIKE %?%
-func (p *BaseEntityQuery) LikeA(colum string) string {
+func (p *BaseEntityQuery) likeA(colum string) string {
+	if len(strings.TrimSpace(colum)) == 0 {
+		return ""
+	}
 	return "%" + colum + "%"
+}
+
+func (p *BaseEntityQuery) AddLikeAll(colum, conditionVal string) {
+	if len(strings.TrimSpace(colum)) > 0 && len(strings.TrimSpace(conditionVal)) > 0 {
+		p.whereCols = append(p.whereCols, colum)
+		p.whereCond = append(p.whereCond, colum+" like ?")
+		p.condVals = append(p.condVals, p.likeA(conditionVal))
+	}
+}
+
+func (p *BaseEntityQuery) AddLikeLeft(colum string, conditionVal string) {
+	if len(strings.TrimSpace(colum)) > 0 && len(strings.TrimSpace(conditionVal)) > 0 {
+		p.whereCols = append(p.whereCols, colum)
+		p.whereCond = append(p.whereCond, colum+" like ?")
+		p.condVals = append(p.condVals, p.likeL(conditionVal))
+	}
+}
+
+func (p *BaseEntityQuery) AddLikeRight(colum string, conditionVal string) {
+	if len(strings.TrimSpace(colum)) > 0 && len(strings.TrimSpace(conditionVal)) > 0 {
+		p.whereCols = append(p.whereCols, colum)
+		p.whereCond = append(p.whereCond, colum+" like ?")
+		p.condVals = append(p.condVals, p.likeR(conditionVal))
+	}
+}
+
+func (p *BaseEntityQuery) GetConditions() ([]string, string, []interface{}) {
+	if p.whereCols == nil || len(p.whereCols) <= 0 {
+		return nil, "", nil
+	}
+	return p.whereCols, strings.Join(p.whereCond, " and "), p.condVals
 }
