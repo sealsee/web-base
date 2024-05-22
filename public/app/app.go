@@ -11,6 +11,7 @@ import (
 	"github.com/sealsee/web-base/public/setting"
 	"github.com/sealsee/web-base/public/utils"
 	"github.com/sealsee/web-base/public/utils/logger"
+	"go.uber.org/zap"
 )
 
 var appPlugin *AppPlugin
@@ -59,6 +60,11 @@ func RunBefore(plugin *AppPlugin) {
 }
 
 func Run() {
+	defer func() {
+		if r := recover(); r != nil {
+			zap.L().Error("系统异常: ", zap.Any("error", r))
+		}
+	}()
 	cleanup := initCompent(setting.Conf.Datasource)
 	defer cleanup()
 	initPlugin()

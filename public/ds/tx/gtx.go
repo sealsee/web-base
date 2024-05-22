@@ -62,8 +62,17 @@ func ExecGTx(exec interface{}) bool {
 		switch fn := exec.(type) {
 		case func(Db):
 			fn(db)
+		case func(GTx):
+			fn(tx)
 		case func(Db) bool:
 			rlt := fn(db)
+			if !rlt {
+				tx.Rollback()
+				zap.L().Error("手动事务回滚")
+				return errors.New("手动事务回滚")
+			}
+		case func(GTx) bool:
+			rlt := fn(tx)
 			if !rlt {
 				tx.Rollback()
 				zap.L().Error("手动事务回滚")
