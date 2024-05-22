@@ -35,7 +35,8 @@ func Expire(key string, expiration time.Duration) {
 }
 
 func Exists(key string) bool {
-	return client.Exists(key).Val() != -1
+	println(client.Exists(key).Val())
+	return client.Exists(key).Val() > 0
 }
 
 func SetString(key, str string, expiration time.Duration) {
