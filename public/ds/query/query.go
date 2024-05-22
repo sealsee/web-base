@@ -33,7 +33,7 @@ func convertWhereQuery(where basemodel.IQuery) (map[string]interface{}, string, 
 				hasCol = true
 			}
 		}
-		if !hasCol {
+		if !hasCol && k != "curPage" && k != "pageSize" {
 			// 添加新key
 			whereMap[dbCol] = v
 		}
