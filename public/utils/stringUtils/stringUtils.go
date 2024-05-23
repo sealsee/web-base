@@ -52,7 +52,7 @@ func ConvertToBigCamelCase(name string) string {
 			continue
 		}
 		camel := camels[index]
-		result = result + strings.ToUpper(camel[0:1]) + strings.ToLower(camel[1:len(camel)])
+		result = result + strings.ToUpper(camel[0:1]) + strings.ToLower(camel[1:])
 	}
 	return result
 }
@@ -75,7 +75,7 @@ func ConvertToLittleCamelCase(name string) string {
 		if result == "" {
 			result = strings.ToLower(camel)
 		} else {
-			result = result + strings.ToUpper(camel[0:1]) + strings.ToLower(camel[1:len(camel)])
+			result = result + strings.ToUpper(camel[0:1]) + strings.ToLower(camel[1:])
 		}
 	}
 	return result

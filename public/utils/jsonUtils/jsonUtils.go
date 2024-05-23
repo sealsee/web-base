@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/sealsee/web-base/public/basemodel"
 	"github.com/sealsee/web-base/public/utils/stringUtils"
 )
 
@@ -24,8 +25,22 @@ func StructToDbMap(in interface{}) (map[string]interface{}, error) {
 	t := v.Type()
 	for i := 0; i < v.NumField(); i++ {
 		f := v.Field(i)
-		// 如果字段是一个结构体，递归转换
-		if f.Kind() == reflect.Struct {
+		tf := t.Field(i)
+		if !f.CanInterface() {
+			continue
+		}
+		// 如果是BaseTime类型，需要特殊处理。
+		if marshaler, ok := f.Interface().(basemodel.BaseTime); ok {
+			if !marshaler.IsZero() {
+				text, err := marshaler.MarshalText()
+				if err != nil {
+					return nil, err
+				}
+				if string(text) != "" {
+					out[stringUtils.ToUnderScoreCase(tf.Name)] = string(text)
+				}
+			}
+		} else if f.Kind() == reflect.Struct { // 如果字段是一个结构体，递归转换
 			embMap, err := StructToDbMap(f.Interface())
 			if err != nil {
 				return nil, err
@@ -35,19 +50,20 @@ func StructToDbMap(in interface{}) (map[string]interface{}, error) {
 			}
 			continue
 		}
+
 		// 忽略未导出字段
-		if t.Field(i).PkgPath != "" {
+		if tf.PkgPath != "" {
 			continue
 		}
 		// 忽略gorm:"-"字段
-		if t.Field(i).Tag.Get("gorm") == "-" {
+		if tf.Tag.Get("gorm") == "-" {
 			continue
 		}
 		// 忽略0值字段
 		if isZero(f.Interface()) {
 			continue
 		}
-		out[stringUtils.ToUnderScoreCase(t.Field(i).Name)] = f.Interface()
+		out[stringUtils.ToUnderScoreCase(tf.Name)] = f.Interface()
 	}
 
 	return out, nil

@@ -12,10 +12,29 @@ import (
 
 var gormdb *gorm.DB
 
+func InitGTx(gdb *gorm.DB) {
+	gormdb = gdb
+}
+
+// 用到gorm的方法签名
+type GTx interface {
+	Create(value interface{}) (tx *gorm.DB)
+	CreateInBatches(value interface{}, batchSize int) (tx *gorm.DB)
+	Delete(value interface{}, conds ...interface{}) (tx *gorm.DB)
+	Updates(values interface{}) (tx *gorm.DB)
+	Where(query interface{}, args ...interface{}) (tx *gorm.DB)
+	Raw(sql string, values ...interface{}) (tx *gorm.DB)
+	Exec(sql string, values ...interface{}) (tx *gorm.DB)
+	Model(value interface{}) (tx *gorm.DB)
+	Omit(columns ...string) (tx *gorm.DB)
+}
+
+// 扩展类型
 type Db struct {
 	*gorm.DB
 }
 
+// 扩展方法
 func (db *Db) UpdatesNew(uWhere interface{}, uData basemodel.IEntidy) (tx *gorm.DB) {
 	dataMap, _ := jsonUtils.StructToDbMap(uData)
 	// fmt.Printf("---> uData map: %v \n", dataMap)
@@ -29,22 +48,7 @@ func (db *Db) UpdatesNew(uWhere interface{}, uData basemodel.IEntidy) (tx *gorm.
 	return db.Model(&uWhere).Where(uWhere).Updates(dataMap)
 }
 
-func InitGTx(gdb *gorm.DB) {
-	gormdb = gdb
-}
-
-type GTx interface {
-	Create(value interface{}) (tx *gorm.DB)
-	CreateInBatches(value interface{}, batchSize int) (tx *gorm.DB)
-	Delete(value interface{}, conds ...interface{}) (tx *gorm.DB)
-	Updates(values interface{}) (tx *gorm.DB)
-	Where(query interface{}, args ...interface{}) (tx *gorm.DB)
-	Raw(sql string, values ...interface{}) (tx *gorm.DB)
-	Exec(sql string, values ...interface{}) (tx *gorm.DB)
-	Model(value interface{}) (tx *gorm.DB)
-	Omit(columns ...string) (tx *gorm.DB)
-}
-
+// 执行写操作
 func ExecGTx(exec interface{}) bool {
 	if exec == nil {
 		return false

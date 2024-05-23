@@ -23,6 +23,16 @@ func (t BaseTime) MarshalJSON() ([]byte, error) {
 	return []byte(timeStr), nil
 }
 
+// MarshalText 实现了TextMarshaler接口，用于将BaseTime转换为map
+func (t BaseTime) MarshalText() ([]byte, error) {
+	timeStr := fmt.Sprintf("\"%s\"", time.Time(t).Format(timeFormat))
+	return []byte(timeStr), nil
+}
+
+func (t BaseTime) IsZero() bool {
+	return time.Time(t).IsZero()
+}
+
 func (t BaseTime) String() string {
 	return time.Time(t).Format(timeFormat)
 }
