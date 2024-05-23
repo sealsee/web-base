@@ -17,7 +17,7 @@ type Db struct {
 }
 
 func (db *Db) UpdatesNew(uWhere interface{}, uData basemodel.IEntidy) (tx *gorm.DB) {
-	dataMap := jsonUtils.StructToMapWithKeyUnderLine(uData)
+	dataMap, _ := jsonUtils.StructToDbMap(uData)
 	// fmt.Printf("---> uData map: %v \n", dataMap)
 	for _, col := range uData.GetToNullCols() {
 		if _, ok := dataMap[col]; ok && dataMap[col] != "" {

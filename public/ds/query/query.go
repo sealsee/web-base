@@ -8,7 +8,6 @@ import (
 	"github.com/sealsee/web-base/public/basemodel"
 	"github.com/sealsee/web-base/public/ds/page"
 	"github.com/sealsee/web-base/public/utils/jsonUtils"
-	"github.com/sealsee/web-base/public/utils/stringUtils"
 	"gorm.io/gorm"
 )
 
@@ -21,21 +20,20 @@ func InitGTx(gdb *gorm.DB) {
 // 处理where条件
 func convertWhereQuery(where basemodel.IQuery) (map[string]interface{}, string, []interface{}) {
 	columns, conditions, args := where.GetConditions()
-	whereMap := jsonUtils.StructToMap(where)
+	whereMap, _ := jsonUtils.StructToDbMap(where)
 	for k, v := range whereMap {
-		dbCol := stringUtils.ToUnderScoreCase(k)
 		// 删除旧key
 		delete(whereMap, k)
 		var hasCol bool
 		// 判断condition column是否在where条件里，如果包含则map里去除
 		for _, col := range columns {
-			if col == dbCol {
+			if col == k {
 				hasCol = true
 			}
 		}
 		if !hasCol && k != "curPage" && k != "pageSize" {
 			// 添加新key
-			whereMap[dbCol] = v
+			whereMap[k] = v
 		}
 	}
 	return whereMap, conditions, args

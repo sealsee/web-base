@@ -22,8 +22,9 @@ func Capitalize(str string) string {
 	return upperStr
 }
 
-// ToUnderScoreCase 将驼峰命名转下划线命名
+// ToUnderScoreCase 将驼峰命名转下划线命名，如：helloWorld（或HelloWorld） -> hello_world
 func ToUnderScoreCase(str string) string {
+	str = strings.ToLower(str[0:1]) + str[1:]
 	var retStr = ""
 	for i, s := range str {
 		if 64 < s && s < 91 && i != 0 {
@@ -36,13 +37,13 @@ func ToUnderScoreCase(str string) string {
 	return retStr
 }
 
-//ConvertToBigCamelCase 将下划线大写方式命名的字符串转换为驼峰式。如果转换前的下划线大写方式命名的字符串为空，则返回空字符串。 例如：HELLO_WORLD->HelloWorld
+// ConvertToBigCamelCase 将下划线大写方式命名的字符串转换为驼峰式。如果转换前的下划线大写方式命名的字符串为空，则返回空字符串。 例如：HELLO_WORLD->HelloWorld
 func ConvertToBigCamelCase(name string) string {
 	if name == "" {
 		return ""
 	} else if !strings.Contains(name, "_") {
 		// 不含下划线，仅将首字母大写
-		return strings.ToUpper(name[0:1]) + name[1:len(name)]
+		return strings.ToUpper(name[0:1]) + name[1:]
 	}
 	var result string = ""
 	camels := strings.Split(name, "_")
@@ -56,7 +57,7 @@ func ConvertToBigCamelCase(name string) string {
 	return result
 }
 
-//ConvertToLittleCamelCase 将下划线大写方式命名的字符串转换为驼峰式,首字母小写。如果转换前的下划线大写方式命名的字符串为空，则返回空字符串。 例如：HELLO_WORLD->helloWorld
+// ConvertToLittleCamelCase 将下划线大写方式命名的字符串转换为驼峰式,首字母小写。如果转换前的下划线大写方式命名的字符串为空，则返回空字符串。 例如：HELLO_WORLD->helloWorld
 func ConvertToLittleCamelCase(name string) string {
 	if name == "" {
 		return ""
@@ -90,4 +91,13 @@ func DeleteExtraSpace(s string) string {
 		spcIndex = reg.FindStringIndex(string(tmpStr))
 	}
 	return string(tmpStr)
+}
+
+func ContainsStr(slice []string, element string) bool {
+	for _, e := range slice {
+		if e == element {
+			return true
+		}
+	}
+	return false
 }
