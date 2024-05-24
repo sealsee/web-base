@@ -90,7 +90,7 @@ func ExecQueryList[QT any, T any](where basemodel.IQuery, page *page.Page) []*T 
 
 // 特殊情况下使用，如需要拼接比较复杂的条件
 func ExecGetQueryCountWithCondition[T any](where basemodel.IQuery, query interface{}, args ...interface{}) int {
-	if (where == nil && query == nil) || args == nil {
+	if where == nil && query == nil {
 		return 0
 	}
 	whereMap, conditions, condArgs := convertWhereQuery(where)
