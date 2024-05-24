@@ -174,12 +174,24 @@ func ExecQueryListWithColumns[T any](columns []string, where basemodel.IQuery, q
 	ts := []*T{}
 
 	// rlt := gormdb.Select(columns).Where(where).Where(query, args...).Limit(100).Find(&ts)
-	gdb2 := gormdb.Select(columns).Where(whereMap)
+	gdb := gormdb.Select(columns).Where(whereMap)
 	if conditions != "" {
-		gdb2 = gdb2.Where(conditions, condArgs...)
+		gdb = gdb.Where(conditions, condArgs...)
 	}
-	rlt := gdb2.Where(query, args...).Limit(100).Find(&ts)
+	rlt := gdb.Where(query, args...).Limit(100).Find(&ts)
 
+	if rlt.RowsAffected <= 0 {
+		return nil
+	}
+	if rlt.Error != nil {
+		panic(rlt.Error)
+	}
+	return ts
+}
+
+func RawSqlQueryList[T any](sql string, args ...interface{}) (res []*T) {
+	ts := []*T{}
+	rlt := gormdb.Raw(sql, args...).Scan(&ts)
 	if rlt.RowsAffected <= 0 {
 		return nil
 	}
