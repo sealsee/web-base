@@ -1,6 +1,7 @@
 package query
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -189,6 +190,7 @@ func ExecQueryListWithColumns[T any](columns []string, where basemodel.IQuery, q
 	return ts
 }
 
+// 原生sql查询
 func RawSqlQueryList[T any](sql string, args ...interface{}) (res []*T) {
 	ts := []*T{}
 	rlt := gormdb.Raw(sql, args...).Scan(&ts)
@@ -198,6 +200,26 @@ func RawSqlQueryList[T any](sql string, args ...interface{}) (res []*T) {
 	if rlt.Error != nil {
 		panic(rlt.Error)
 	}
+	return ts
+}
+
+// 原生sql查询，支持列表分页
+func RawSqlQueryListWithPage[T any](page *page.Page, sql string, args ...interface{}) (res []*T) {
+	ts := []*T{}
+	var total int64
+	rlt := gormdb.Table("("+sql+") AS CT", args...).Count(&total)
+	if rlt.Error != nil {
+		panic(rlt.Error)
+	}
+	sql += fmt.Sprintf(" LIMIT %v OFFSET %v", page.GetLimit(), page.GetOffset())
+	rlt = gormdb.Raw(sql, args...).Scan(&ts)
+	if rlt.RowsAffected <= 0 {
+		return nil
+	}
+	if rlt.Error != nil {
+		panic(rlt.Error)
+	}
+	page.SetTotalSize(int(total))
 	return ts
 }
 
