@@ -18,7 +18,7 @@ func InitGTx(gdb *gorm.DB) {
 	gormdb = gdb
 }
 
-// 处理where条件
+// 处理where条件, 转换合并成map条件+自定义条件
 func convertWhereQuery(where basemodel.IQuery) (map[string]interface{}, string, []interface{}) {
 	columns, conditions, args := where.GetConditions()
 	whereMap, _ := jsonUtils.StructToDbMap(where)

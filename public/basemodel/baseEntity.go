@@ -15,10 +15,15 @@ type IQuery interface {
 
 type IEntidy interface {
 	GetToNullCols() []string
+	GetToZeroCols() []string
+	GetConditions() ([]string, string, []interface{})
 }
 
 type Entity struct {
-	Deleted int `json:"-"`
+	Deleted   int           `json:"-"`
+	whereCols []string      `gorm:"-" json:"-"` // 扩展条件字段名
+	whereCond []string      `gorm:"-" json:"-"` // 扩展条件内容
+	condVals  []interface{} `gorm:"-" json:"-"` // 扩展条件值
 }
 
 type BaseEntity struct {
@@ -27,17 +32,15 @@ type BaseEntity struct {
 	UpdateBy   int64    `json:"updateBy,string,omitempty"` //修改人
 	UpdateTime BaseTime `json:"updateTime,omitempty"`      //修改时间
 	Entity
-	toNullCols []string `gorm:"-" json:"-"` //更新时需要置空的字段列表
+	toNullCols []string `gorm:"-" json:"-"` //更新时需要置空(null)的字段列表
+	toZeroCols []string `gorm:"-" json:"-"` //更新时需要设0值(0、"")的字段列表，仅支持int和string类型字段
 }
 
 type BaseEntityQuery struct {
 	CurPage  int `gorm:"-" form:"curPage" json:"curPage,omitempty"`   //第几页
 	PageSize int `gorm:"-" form:"pageSize" json:"pageSize,omitempty"` //数量
 	Entity
-	orders    []string      `gorm:"-" json:"-"`
-	whereCols []string      `gorm:"-" json:"-"` // 扩展条件字段名
-	whereCond []string      `gorm:"-" json:"-"` // 扩展条件内容
-	condVals  []interface{} `gorm:"-" json:"-"` // 扩展条件值
+	orders []string `gorm:"-" json:"-"`
 }
 
 func (p *BaseEntity) SetCreateBy(createBy int64) {
@@ -63,6 +66,15 @@ func (p *BaseEntity) SetNullableCols(cols ...string) {
 
 func (p *BaseEntity) GetToNullCols() []string {
 	return p.toNullCols
+}
+
+// 设置需要设0值(0、"")的字段列表，仅支持int类型字段
+func (p *BaseEntity) SetToZeroCols(cols ...string) {
+	p.toZeroCols = append(p.toZeroCols, cols...)
+}
+
+func (p *BaseEntity) GetToZeroCols() []string {
+	return p.toZeroCols
 }
 
 func (p *BaseEntityQuery) GetPage() *page.Page {
@@ -98,7 +110,7 @@ func (p *BaseEntityQuery) GetOrders() string {
 }
 
 // AND column LIKE %?%
-func (p *BaseEntityQuery) AddLikeAll(column, conditionVal string) *BaseEntityQuery {
+func (p *Entity) AddLikeAll(column, conditionVal string) *Entity {
 	if len(strings.TrimSpace(column)) > 0 && len(strings.TrimSpace(conditionVal)) > 0 {
 		p.whereCols = append(p.whereCols, column)
 		p.whereCond = append(p.whereCond, column+" LIKE ?")
@@ -108,7 +120,7 @@ func (p *BaseEntityQuery) AddLikeAll(column, conditionVal string) *BaseEntityQue
 }
 
 // AND column LIKE %?
-func (p *BaseEntityQuery) AddLikeLeft(column string, conditionVal string) *BaseEntityQuery {
+func (p *Entity) AddLikeLeft(column string, conditionVal string) *Entity {
 	if len(strings.TrimSpace(column)) > 0 && len(strings.TrimSpace(conditionVal)) > 0 {
 		p.whereCols = append(p.whereCols, column)
 		p.whereCond = append(p.whereCond, column+" LIKE ?")
@@ -118,7 +130,7 @@ func (p *BaseEntityQuery) AddLikeLeft(column string, conditionVal string) *BaseE
 }
 
 // AND column LIKE ?%
-func (p *BaseEntityQuery) AddLikeRight(column string, conditionVal string) *BaseEntityQuery {
+func (p *Entity) AddLikeRight(column string, conditionVal string) *Entity {
 	if len(strings.TrimSpace(column)) > 0 && len(strings.TrimSpace(conditionVal)) > 0 {
 		p.whereCols = append(p.whereCols, column)
 		p.whereCond = append(p.whereCond, column+" LIKE ?")
@@ -128,32 +140,32 @@ func (p *BaseEntityQuery) AddLikeRight(column string, conditionVal string) *Base
 }
 
 // AND column <> ?
-func (p *BaseEntityQuery) AddNot(column string, value interface{}) *BaseEntityQuery {
+func (p *Entity) AddNot(column string, value interface{}) *Entity {
 	return p.buildCompare(column, value, "<>")
 }
 
 // AND column < ?
-func (p *BaseEntityQuery) AddLt(column string, value interface{}) *BaseEntityQuery {
+func (p *Entity) AddLt(column string, value interface{}) *Entity {
 	return p.buildCompare(column, value, "<")
 }
 
 // AND column <= ?
-func (p *BaseEntityQuery) AddLe(column string, value interface{}) *BaseEntityQuery {
+func (p *Entity) AddLe(column string, value interface{}) *Entity {
 	return p.buildCompare(column, value, "<=")
 }
 
 // AND column > ?
-func (p *BaseEntityQuery) AddGt(column string, value interface{}) *BaseEntityQuery {
+func (p *Entity) AddGt(column string, value interface{}) *Entity {
 	return p.buildCompare(column, value, ">")
 }
 
 // AND column >= ?
-func (p *BaseEntityQuery) AddGe(column string, value interface{}) *BaseEntityQuery {
+func (p *Entity) AddGe(column string, value interface{}) *Entity {
 	return p.buildCompare(column, value, ">=")
 }
 
 // 构建比较方法
-func (p *BaseEntityQuery) buildCompare(column string, value interface{}, cond string) *BaseEntityQuery {
+func (p *Entity) buildCompare(column string, value interface{}, cond string) *Entity {
 	if value != nil {
 		p.whereCols = append(p.whereCols, column)
 		p.whereCond = append(p.whereCond, column+" "+cond+" ?")
@@ -163,7 +175,7 @@ func (p *BaseEntityQuery) buildCompare(column string, value interface{}, cond st
 }
 
 // AND column IN (?)
-func (p *BaseEntityQuery) AddIn(column string, conditionVal ...interface{}) *BaseEntityQuery {
+func (p *Entity) AddIn(column string, conditionVal ...interface{}) *Entity {
 	if len(conditionVal) > 0 {
 		p.whereCols = append(p.whereCols, column)
 		p.whereCond = append(p.whereCond, column+" IN ?")
@@ -173,7 +185,7 @@ func (p *BaseEntityQuery) AddIn(column string, conditionVal ...interface{}) *Bas
 }
 
 // AND column NOT IN (?)
-func (p *BaseEntityQuery) AddNotIn(column string, conditionVal ...interface{}) *BaseEntityQuery {
+func (p *Entity) AddNotIn(column string, conditionVal ...interface{}) *Entity {
 	if len(conditionVal) > 0 {
 		p.whereCols = append(p.whereCols, column)
 		p.whereCond = append(p.whereCond, column+" NOT IN ?")
@@ -183,7 +195,7 @@ func (p *BaseEntityQuery) AddNotIn(column string, conditionVal ...interface{}) *
 }
 
 // AND column BETWEEN ? AND ?
-func (p *BaseEntityQuery) AddBetween(column string, condStart, condEnd interface{}) *BaseEntityQuery {
+func (p *Entity) AddBetween(column string, condStart, condEnd interface{}) *Entity {
 	if condStart != nil && condEnd != nil {
 		p.whereCols = append(p.whereCols, column)
 		p.whereCond = append(p.whereCond, column+" BETWEEN ? AND ?")
@@ -193,20 +205,20 @@ func (p *BaseEntityQuery) AddBetween(column string, condStart, condEnd interface
 }
 
 // AND column IS NULL
-func (p *BaseEntityQuery) AddIsNull(column string) *BaseEntityQuery {
+func (p *Entity) AddIsNull(column string) *Entity {
 	p.whereCols = append(p.whereCols, column)
 	p.whereCond = append(p.whereCond, column+" IS NULL")
 	return p
 }
 
 // AND column IS NOT NULL
-func (p *BaseEntityQuery) AddIsNotNull(column string) *BaseEntityQuery {
+func (p *Entity) AddIsNotNull(column string) *Entity {
 	p.whereCols = append(p.whereCols, column)
 	p.whereCond = append(p.whereCond, column+" IS NOT NULL")
 	return p
 }
 
-func (p *BaseEntityQuery) GetConditions() ([]string, string, []interface{}) {
+func (p *Entity) GetConditions() ([]string, string, []interface{}) {
 	if p.whereCols == nil || len(p.whereCols) <= 0 {
 		return nil, "", nil
 	}

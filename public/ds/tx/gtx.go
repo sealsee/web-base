@@ -34,8 +34,8 @@ type Db struct {
 	*gorm.DB
 }
 
-// 扩展方法
-func (db *Db) UpdatesNew(uWhere interface{}, uData basemodel.IEntidy) (tx *gorm.DB) {
+// 扩展方法-更新，支持自定义条件、支持所有字段置NULL、支持数字类型置零、支持条件传参
+func (db *Db) UpdatesNewWithCondition(uWhere interface{}, uData basemodel.IEntidy, condition interface{}, args ...interface{}) (tx *gorm.DB) {
 	dataMap, _ := jsonUtils.StructToDbMap(uData)
 	// fmt.Printf("---> uData map: %v \n", dataMap)
 	for _, col := range uData.GetToNullCols() {
@@ -44,8 +44,27 @@ func (db *Db) UpdatesNew(uWhere interface{}, uData basemodel.IEntidy) (tx *gorm.
 		}
 		dataMap[col] = nil
 	}
+	for _, col := range uData.GetToZeroCols() {
+		if _, ok := dataMap[col]; ok {
+			continue
+		}
+		dataMap[col] = 0
+	}
 	// fmt.Printf("---> dataMap: %v \n", dataMap)
-	return db.Model(&uWhere).Where(uWhere).Updates(dataMap)
+	whereMap, cond, condArgs := convertWhereEntity(uWhere)
+	gdb := db.Model(&uWhere).Where(whereMap)
+	if cond != "" {
+		gdb.Where(cond, condArgs...)
+	}
+	if condition != nil {
+		gdb.Where(condition, args...)
+	}
+	return gdb.Updates(dataMap)
+}
+
+// 扩展方法-更新，支持自定义条件、支持所有字段置NULL、支持数字类型置零
+func (db *Db) UpdatesNew(uWhere interface{}, uData basemodel.IEntidy) (tx *gorm.DB) {
+	return db.UpdatesNewWithCondition(uWhere, uData, nil)
 }
 
 // 执行写操作
@@ -94,4 +113,30 @@ func ExecGTx(exec interface{}) bool {
 		return false
 	}
 	return true
+}
+
+// 处理where条件, 转换合并成map条件+自定义条件
+func convertWhereEntity(where interface{}) (map[string]interface{}, string, []interface{}) {
+	if iface, ok := where.(basemodel.IEntidy); ok {
+		columns, conditions, args := iface.GetConditions()
+		whereMap, _ := jsonUtils.StructToDbMap(where)
+		for k, v := range whereMap {
+			// 删除旧key
+			delete(whereMap, k)
+			var hasCol bool
+			// 判断condition column是否在where条件里，如果包含则map里去除
+			for _, col := range columns {
+				if col == k {
+					hasCol = true
+				}
+			}
+			if !hasCol && k != "curPage" && k != "pageSize" {
+				// 添加新key
+				whereMap[k] = v
+			}
+		}
+		return whereMap, conditions, args
+	} else {
+		panic(errors.New("where entity is invalid"))
+	}
 }
