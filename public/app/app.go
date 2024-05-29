@@ -60,16 +60,10 @@ func RunBefore(plugin *AppPlugin) {
 	appPlugin = plugin
 }
 
-func InitServer() *gin.Engine {
-	defer func() {
-		if r := recover(); r != nil {
-			zap.L().Error("系统异常: ", zap.Any("error", r))
-		}
-	}()
+func InitServer() (*gin.Engine, func()) {
 	cleanup := initCompent(setting.Conf.Datasource)
-	defer cleanup()
 	initPlugin()
-	return route.RegisterServer()
+	return route.RegisterServer(), cleanup
 }
 
 func RunServer(engine *gin.Engine) {
