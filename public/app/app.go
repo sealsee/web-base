@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gin-gonic/gin"
 	"github.com/sealsee/web-base/public/IOFile"
 	"github.com/sealsee/web-base/public/ds"
 	"github.com/sealsee/web-base/public/middlewares"
@@ -57,6 +58,22 @@ func initPlugin() {
 
 func RunBefore(plugin *AppPlugin) {
 	appPlugin = plugin
+}
+
+func InitServer() *gin.Engine {
+	defer func() {
+		if r := recover(); r != nil {
+			zap.L().Error("系统异常: ", zap.Any("error", r))
+		}
+	}()
+	cleanup := initCompent(setting.Conf.Datasource)
+	defer cleanup()
+	initPlugin()
+	return route.RegisterServer()
+}
+
+func RunServer(engine *gin.Engine) {
+	engine.Run(fmt.Sprintf(":%d", setting.Conf.Port))
 }
 
 func Run() {

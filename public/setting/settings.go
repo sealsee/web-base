@@ -16,6 +16,7 @@ type AppConfig struct {
 	Port         int    `mapstructure:"port"`
 	Host         string `mapstructure:"host"`
 	IsDocker     bool
+	HtmlEmbed    bool `mapstructure:"html_embed"`
 	*TokenConfig `mapstructure:"token"`
 	*LogConfig   `mapstructure:"log"`
 	*Datasource  `mapstructure:"datasource"`

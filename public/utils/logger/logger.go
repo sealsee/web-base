@@ -129,7 +129,7 @@ func GinLogger(url *map[string]string) gin.HandlerFunc {
 			userId = strconv.FormatInt(user.UserId, 10)
 			userName = user.UserName
 		}
-		if path != "/" {
+		if path != "/" && path != "/ui" && !strings.HasPrefix(path, "/assets/") && !strings.HasPrefix(path, "/static/") {
 			params := map[string]any{
 				"requestId":  requestId,
 				"reqTime":    start,
