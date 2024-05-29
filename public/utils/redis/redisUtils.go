@@ -23,32 +23,28 @@ func handelErr(err error) {
 }
 
 func Expire(key string, expiration time.Duration) {
-	go func() {
-		defer func() {
-			if err := recover(); err != nil {
-				zap.L().Error("redisUtils", zap.Any("error", err))
-			}
-		}()
-		err := client.Expire(key, expiration).Err()
-		handelErr(err)
+	defer func() {
+		if err := recover(); err != nil {
+			zap.L().Error("redisUtils", zap.Any("error", err))
+		}
 	}()
+	err := client.Expire(key, expiration).Err()
+	handelErr(err)
 }
 
 func Exists(key string) bool {
-	println(client.Exists(key).Val())
+	// println(client.Exists(key).Val())
 	return client.Exists(key).Val() > 0
 }
 
 func SetString(key, str string, expiration time.Duration) {
-	go func() {
-		defer func() {
-			if err := recover(); err != nil {
-				zap.L().Error("redisUtils", zap.Any("error", err))
-			}
-		}()
-		err := client.Set(key, str, expiration).Err()
-		handelErr(err)
+	defer func() {
+		if err := recover(); err != nil {
+			zap.L().Error("redisUtils", zap.Any("error", err))
+		}
 	}()
+	err := client.Set(key, str, expiration).Err()
+	handelErr(err)
 }
 
 func GetString(key string) string {
@@ -60,15 +56,13 @@ func SetStruct(key string, value interface{}, expiration time.Duration) {
 	if err != nil {
 		zap.L().Error("Redis存储失败", zap.Error(err))
 	}
-	go func() {
-		defer func() {
-			if err := recover(); err != nil {
-				zap.L().Error("redisUtils", zap.Any("error", err))
-			}
-		}()
-		err = client.Set(key, marshal, expiration).Err()
-		handelErr(err)
+	defer func() {
+		if err := recover(); err != nil {
+			zap.L().Error("redisUtils", zap.Any("error", err))
+		}
 	}()
+	err = client.Set(key, marshal, expiration).Err()
+	handelErr(err)
 }
 
 func GetStruct[T any](key string, t *T) (*T, error) {
@@ -79,27 +73,23 @@ func GetStruct[T any](key string, t *T) (*T, error) {
 }
 
 func Hset(key, field string, value interface{}) {
-	go func() {
-		defer func() {
-			if err := recover(); err != nil {
-				zap.L().Error("redisUtils", zap.Any("error", err))
-			}
-		}()
-		err := client.HSet(key, field, value).Err()
-		handelErr(err)
+	defer func() {
+		if err := recover(); err != nil {
+			zap.L().Error("redisUtils", zap.Any("error", err))
+		}
 	}()
+	err := client.HSet(key, field, value).Err()
+	handelErr(err)
 }
 
 func Hmset(key string, fields map[string]interface{}) {
-	go func() {
-		defer func() {
-			if err := recover(); err != nil {
-				zap.L().Error("redisUtils", zap.Any("error", err))
-			}
-		}()
-		err := client.HMSet(key, fields).Err()
-		handelErr(err)
+	defer func() {
+		if err := recover(); err != nil {
+			zap.L().Error("redisUtils", zap.Any("error", err))
+		}
 	}()
+	err := client.HMSet(key, fields).Err()
+	handelErr(err)
 }
 
 func Hget[T any](key, field string, _ *T) *T {
@@ -114,23 +104,19 @@ func HGetAll(key string) map[string]string {
 }
 
 func Hdel(key string, field ...string) {
-	go func() {
-		defer func() {
-			if err := recover(); err != nil {
-				zap.L().Error("redisUtils", zap.Any("error", err))
-			}
-		}()
-		client.HDel(key, field...)
+	defer func() {
+		if err := recover(); err != nil {
+			zap.L().Error("redisUtils", zap.Any("error", err))
+		}
 	}()
+	client.HDel(key, field...)
 }
 
 func Del(key ...string) {
-	go func() {
-		defer func() {
-			if err := recover(); err != nil {
-				zap.L().Error("redisUtils", zap.Any("error", err))
-			}
-		}()
-		client.Del(key...)
+	defer func() {
+		if err := recover(); err != nil {
+			zap.L().Error("redisUtils", zap.Any("error", err))
+		}
 	}()
+	client.Del(key...)
 }
