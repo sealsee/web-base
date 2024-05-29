@@ -16,7 +16,7 @@ type AppConfig struct {
 	Port         int    `mapstructure:"port"`
 	Host         string `mapstructure:"host"`
 	IsDocker     bool
-	HtmlEmbed    bool `mapstructure:"html_embed"`
+	UiInside     string `mapstructure:"ui_inside"` // 前端资源放入服务端访问，"embed":编译时打包嵌入到可执行程序内部；"outdir":访问静态资源目录
 	*TokenConfig `mapstructure:"token"`
 	*LogConfig   `mapstructure:"log"`
 	*Datasource  `mapstructure:"datasource"`
