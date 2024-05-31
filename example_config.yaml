@@ -36,16 +36,16 @@ datasource:
     db: 0
     pool_size: 100
   rabbitmq:
-    enabled:  true
+    enabled: true
     host: 192.168.1.1
     port: 5672
     user: aa
     password: bb
   kafka:
-    enabled:  true
+    enabled: true
     Addrs:  192.168.1.1:9092
   mongodb:
-    enabled:  true
+    enabled: true
     host: 192.168.1.1
     port: 27017
     dbname: dbname

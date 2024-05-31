@@ -11,6 +11,7 @@ import (
 	"github.com/go-redis/redis"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/patrickmn/go-cache"
 	"github.com/sealsee/web-base/public/ds/query"
 	"github.com/sealsee/web-base/public/ds/tx"
 	"github.com/sealsee/web-base/public/setting"
@@ -32,6 +33,7 @@ type Data struct {
 	masterDb    *sqlx.DB
 	slaveDb     []*sqlx.DB
 	redisDb     *redis.Client
+	cacheMemory *cache.Cache
 	rabbitMQChn *amqp.Channel
 	kfkProducer sarama.SyncProducer
 	kfkConsumer sarama.ConsumerGroup
@@ -54,6 +56,10 @@ func GetRedisClient() *redis.Client {
 	return data.redisDb
 }
 
+func GetCacheMemory() *cache.Cache {
+	return data.cacheMemory
+}
+
 func GetRabbitMQChn() *amqp.Channel {
 	return data.rabbitMQChn
 }
@@ -74,6 +80,7 @@ func InitCompent(d *setting.Datasource) (*Data, func(), error) {
 	gormDb := newGormDB(d.Master)
 	masterDb := newMasterDB(d.Master)
 	slaveDb := newSlaveDB(d.Slave)
+	cacheMemory := newCacheMemory()
 	redisClient := newRedis(d.Redis)
 	rabbitMQChn := newRabbitMq(d.RabbitMQ)
 	kfkProducer, kfkConsumer := newKafka(d.Kafka)
@@ -85,7 +92,9 @@ func InitCompent(d *setting.Datasource) (*Data, func(), error) {
 		for _, db := range slaveDb {
 			db.Close()
 		}
-		redisClient.Close()
+		if redisClient != nil {
+			redisClient.Close()
+		}
 		if rabbitMQChn != nil {
 			rabbitMQChn.Close()
 		}
@@ -103,7 +112,7 @@ func InitCompent(d *setting.Datasource) (*Data, func(), error) {
 	tx.Init(masterDb)
 	tx.InitGTx(gormDb)
 	query.InitGTx(gormDb)
-	data = &Data{gormDb: gormDb, masterDb: masterDb, slaveDb: slaveDb, redisDb: redisClient,
+	data = &Data{gormDb: gormDb, masterDb: masterDb, slaveDb: slaveDb, redisDb: redisClient, cacheMemory: cacheMemory,
 		rabbitMQChn: rabbitMQChn, kfkProducer: kfkProducer, kfkConsumer: kfkConsumer, mgoDb: mgoDb}
 	return data, cleanup, nil
 }
@@ -178,6 +187,10 @@ func newSlaveDB(slave *setting.Slave) []*sqlx.DB {
 }
 
 func newRedis(r *setting.Redis) *redis.Client {
+	if !r.Enabled {
+		zap.L().Info("Redis settings not enabled !")
+		return nil
+	}
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", r.Host, r.Port),
 		Password: r.Password,
@@ -188,6 +201,13 @@ func newRedis(r *setting.Redis) *redis.Client {
 	}
 	zap.L().Info("Redis init success...")
 	return rdb
+}
+
+func newCacheMemory() *cache.Cache {
+	// 创建一个缓存，设置默认过期时间为 5 分钟，每 10 分钟清理过期项目
+	c := cache.New(5*time.Minute, 10*time.Minute)
+	zap.L().Info("Cache Memory init success...")
+	return c
 }
 
 func newRabbitMq(r *setting.RabbitMQ) *amqp.Channel {

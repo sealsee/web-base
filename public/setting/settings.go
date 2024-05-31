@@ -69,6 +69,7 @@ type Slave struct {
 }
 
 type Redis struct {
+	Enabled      bool   `mapstructure:"enabled"`
 	Host         string `mapstructure:"host"`
 	Password     string `mapstructure:"password"`
 	Port         int    `mapstructure:"port"`
