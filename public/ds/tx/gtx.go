@@ -118,6 +118,11 @@ func ExecGTx(exec interface{}) bool {
 // 处理where条件, 转换合并成map条件+自定义条件
 func convertWhereEntity(where interface{}) (map[string]interface{}, string, []interface{}) {
 	if iface, ok := where.(basemodel.IEntidy); ok {
+		// 获取设置的表别名
+		alias := iface.GetAlias()
+		if alias != "" {
+			alias += "."
+		}
 		columns, conditions, args := iface.GetConditions()
 		whereMap, _ := jsonUtils.StructToDbMap(where)
 		for k, v := range whereMap {
@@ -132,10 +137,18 @@ func convertWhereEntity(where interface{}) (map[string]interface{}, string, []in
 			}
 			if !hasCol && k != "curPage" && k != "pageSize" {
 				// 添加新key
-				whereMap[k] = v
+				whereMap[alias+k] = v
 			}
 		}
-		return whereMap, conditions, args
+		condStr := ""
+		for i := 1; i <= len(conditions); i++ {
+			suffix := "AND"
+			if i == len(conditions) {
+				suffix = ""
+			}
+			condStr += fmt.Sprintf("%v%v %v ", alias, conditions[i-1], suffix)
+		}
+		return whereMap, condStr, args
 	} else {
 		panic(errors.New("where entity is invalid"))
 	}

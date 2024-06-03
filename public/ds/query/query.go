@@ -20,6 +20,11 @@ func InitGTx(gdb *gorm.DB) {
 
 // 处理where条件, 转换合并成map条件+自定义条件
 func convertWhereQuery(where basemodel.IQuery) (map[string]interface{}, string, []interface{}) {
+	// 获取设置的表别名
+	alias := where.GetAlias()
+	if alias != "" {
+		alias += "."
+	}
 	columns, conditions, args := where.GetConditions()
 	whereMap, _ := jsonUtils.StructToDbMap(where)
 	for k, v := range whereMap {
@@ -34,10 +39,18 @@ func convertWhereQuery(where basemodel.IQuery) (map[string]interface{}, string, 
 		}
 		if !hasCol && k != "curPage" && k != "pageSize" {
 			// 添加新key
-			whereMap[k] = v
+			whereMap[alias+k] = v
 		}
 	}
-	return whereMap, conditions, args
+	condStr := ""
+	for i := 1; i <= len(conditions); i++ {
+		suffix := "AND"
+		if i == len(conditions) {
+			suffix = ""
+		}
+		condStr += fmt.Sprintf("%v%v %v ", alias, conditions[i-1], suffix)
+	}
+	return whereMap, condStr, args
 }
 
 func ExecGetQueryCount[QT any, T any](where basemodel.IQuery) int {
@@ -207,6 +220,36 @@ func RawSqlQueryList[T any](sql string, args ...interface{}) (res []*T) {
 func RawSqlQueryListWithPage[T any](page *page.Page, sql string, args ...interface{}) (res []*T) {
 	ts := []*T{}
 	var total int64
+	rlt := gormdb.Table("("+sql+") AS CT", args...).Count(&total)
+	if rlt.Error != nil {
+		panic(rlt.Error)
+	}
+	sql += fmt.Sprintf(" LIMIT %v OFFSET %v", page.GetLimit(), page.GetOffset())
+	rlt = gormdb.Raw(sql, args...).Scan(&ts)
+	if rlt.RowsAffected <= 0 {
+		return nil
+	}
+	if rlt.Error != nil {
+		panic(rlt.Error)
+	}
+	page.SetTotalSize(int(total))
+	return ts
+}
+
+// 原生sql查询，支持列表分页，支持自定义条件where condition
+func RawSqlQueryListWithPageWhere[T any](where basemodel.IQuery, page *page.Page, sql string, args ...interface{}) (res []*T) {
+	ts := []*T{}
+	var total int64
+
+	whereMap, conditions, condArgs := convertWhereQuery(where)
+	for k, v := range whereMap {
+		sql += fmt.Sprintf(" AND %s = '%v'", k, v)
+	}
+	if conditions != "" {
+		sql += fmt.Sprintf(" AND %v", conditions)
+		args = append(args, condArgs...)
+	}
+
 	rlt := gormdb.Table("("+sql+") AS CT", args...).Count(&total)
 	if rlt.Error != nil {
 		panic(rlt.Error)

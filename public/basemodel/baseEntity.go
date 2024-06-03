@@ -10,13 +10,15 @@ import (
 
 type IQuery interface {
 	GetOrders() string
-	GetConditions() ([]string, string, []interface{})
+	GetConditions() ([]string, []string, []interface{})
+	GetAlias() string
 }
 
 type IEntidy interface {
 	GetToNullCols() []string
 	GetToZeroCols() []string
-	GetConditions() ([]string, string, []interface{})
+	GetConditions() ([]string, []string, []interface{})
+	GetAlias() string
 }
 
 type Entity struct {
@@ -24,6 +26,7 @@ type Entity struct {
 	whereCols []string      `gorm:"-" json:"-"` // 扩展条件字段名
 	whereCond []string      `gorm:"-" json:"-"` // 扩展条件内容
 	condVals  []interface{} `gorm:"-" json:"-"` // 扩展条件值
+	asAlias   string        `gorm:"-" json:"-"` // 表别名
 }
 
 type BaseEntity struct {
@@ -109,8 +112,20 @@ func (p *BaseEntityQuery) GetOrders() string {
 	return strings.Join(p.orders, ",")
 }
 
+// 设置条件语句里的表别名，组装sql时会使用a.column_name
+func (p *Entity) SetAlias(alias string) *Entity {
+	p.asAlias = alias
+	return p
+}
+
+// 获取条件语句里的表别名，组装sql时会使用a.column_name
+func (p *Entity) GetAlias() string {
+	return p.asAlias
+}
+
 // AND column LIKE %?%
 func (p *Entity) AddLikeAll(column, conditionVal string) *Entity {
+
 	if len(strings.TrimSpace(column)) > 0 && len(strings.TrimSpace(conditionVal)) > 0 {
 		p.whereCols = append(p.whereCols, column)
 		p.whereCond = append(p.whereCond, column+" LIKE ?")
@@ -137,6 +152,11 @@ func (p *Entity) AddLikeRight(column string, conditionVal string) *Entity {
 		p.condVals = append(p.condVals, conditionVal+"%")
 	}
 	return p
+}
+
+// AND column = ?
+func (p *Entity) AddEq(column string, value interface{}) *Entity {
+	return p.buildCompare(column, value, "=")
 }
 
 // AND column <> ?
@@ -218,9 +238,9 @@ func (p *Entity) AddIsNotNull(column string) *Entity {
 	return p
 }
 
-func (p *Entity) GetConditions() ([]string, string, []interface{}) {
+func (p *Entity) GetConditions() ([]string, []string, []interface{}) {
 	if p.whereCols == nil || len(p.whereCols) <= 0 {
-		return nil, "", nil
+		return nil, nil, nil
 	}
-	return p.whereCols, strings.Join(p.whereCond, " AND "), p.condVals
+	return p.whereCols, p.whereCond, p.condVals
 }
