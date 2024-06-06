@@ -109,7 +109,7 @@ func (l *localHostIOFile) Download(url string) ([]byte, error) {
 	} else {
 		return nil, errors.New(url + " is error")
 	}
-
+	filePath = filePath[len(cst.ResourcePrefix)+2:]
 	pathBulider.WriteString(filePath)
 	if !fileUtils.IsExist(pathBulider.String()) {
 		return nil, errors.New(pathBulider.String() + " is not exist")
