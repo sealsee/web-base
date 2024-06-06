@@ -30,8 +30,6 @@ func (l *localHostIOFile) Upload(data io.Reader, suffixName, fileExt string, isP
 
 	var pathAll strings.Builder
 	var filePath strings.Builder
-	filePath.WriteString(cst.ResourcePrefix)
-	filePath.WriteString("/")
 
 	if isPrivate {
 		pathAll.WriteString(l.privatePath)
@@ -86,7 +84,7 @@ func (l *localHostIOFile) Upload(data io.Reader, suffixName, fileExt string, isP
 		domain += "/"
 	}
 
-	return domain + filePath.String(), nil
+	return domain + cst.ResourcePrefix + "/" + filePath.String(), nil
 }
 
 func (l *localHostIOFile) Download(url string) ([]byte, error) {
