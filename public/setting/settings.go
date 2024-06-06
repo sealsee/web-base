@@ -16,7 +16,8 @@ type AppConfig struct {
 	Port         int    `mapstructure:"port"`
 	Host         string `mapstructure:"host"`
 	IsDocker     bool
-	UiInside     string `mapstructure:"ui_inside"` // 前端资源放入服务端访问，"embed":编译时打包嵌入到可执行程序内部；"outdir":访问静态资源目录
+	UiInside     string `mapstructure:"ui_inside"`    // 前端资源放入服务端访问，"embed":编译时打包嵌入到可执行程序内部；"outdir":访问静态资源目录
+	OpenBrowser  bool   `mapstructure:"open_browser"` // server服务启动后，自动打开浏览器访问系统
 	*TokenConfig `mapstructure:"token"`
 	*LogConfig   `mapstructure:"log"`
 	*Datasource  `mapstructure:"datasource"`
