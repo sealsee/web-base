@@ -89,6 +89,8 @@ func initRoutes(r *gin.RouterGroup, checkLogin bool) {
 // 处理跨域请求,支持options访问
 func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// 所有请求，头上加版本号
+		c.Header("Back-End-Version", setting.Conf.Version)
 		method := c.Request.Method               //请求方法
 		origin := c.Request.Header.Get("Origin") //请求头部
 		if origin != "" {
