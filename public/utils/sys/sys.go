@@ -3,6 +3,8 @@ package sys
 import (
 	"fmt"
 	"net"
+	"os/exec"
+	"runtime"
 )
 
 var LOCAL_IP string
@@ -29,5 +31,25 @@ func initlocalIp() {
 				}
 			}
 		}
+	}
+}
+
+// 打开系统默认浏览器访问url地址
+func OpenBrowser(url string) {
+	var err error
+
+	switch os := runtime.GOOS; os {
+	case "linux":
+		err = exec.Command("xdg-open", url).Start()
+	case "windows":
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	default:
+		err = fmt.Errorf("unsupported platform")
+	}
+
+	if err != nil {
+		panic(err)
 	}
 }
