@@ -88,13 +88,15 @@ func (l *localHostIOFile) Upload(data io.Reader, suffixName, fileExt string, isP
 }
 
 func (l *localHostIOFile) Download(url string) ([]byte, error) {
-	if url == "" && !strings.HasPrefix(url, "http") {
+	if url == "" && !strings.HasPrefix(url, "http") && !strings.HasPrefix(url, "/"+cst.ResourcePrefix) {
 		return nil, nil
 	}
 
 	filePath := ""
 	if strings.HasPrefix(url, l.domainName) {
 		filePath = url[len(l.domainName):]
+	} else if strings.HasPrefix(url, "/"+cst.ResourcePrefix) {
+		filePath = url
 	}
 
 	if filePath == "" {
