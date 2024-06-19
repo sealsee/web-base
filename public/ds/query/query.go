@@ -103,7 +103,7 @@ func ExecQueryList[QT any, T any](where basemodel.IQuery, page *page.Page) []*T 
 
 // 特殊情况下使用，如需要拼接比较复杂的条件
 func ExecGetQueryCountWithCondition[T any](where basemodel.IQuery, query interface{}, args ...interface{}) int {
-	if where == nil && query == nil {
+	if where == nil {
 		return 0
 	}
 	whereMap, conditions, condArgs := convertWhereQuery(where)
@@ -113,7 +113,10 @@ func ExecGetQueryCountWithCondition[T any](where basemodel.IQuery, query interfa
 	if conditions != "" {
 		gdb = gdb.Where(conditions, condArgs...)
 	}
-	rlt := gdb.Where(query, args...).Count(&count)
+	if query != nil {
+		gdb = gdb.Where(query, args...)
+	}
+	rlt := gdb.Count(&count)
 	if rlt.Error != nil {
 		panic(rlt.Error)
 	}
@@ -138,7 +141,10 @@ func ExecQueryListWithCondition[T any](where basemodel.IQuery, page *page.Page, 
 	if conditions != "" {
 		gdb = gdb.Where(conditions, condArgs...)
 	}
-	rlt := gdb.Where(query, args...).Order(where.GetOrders()).Find(&ts)
+	if query != nil {
+		gdb = gdb.Where(query, args...)
+	}
+	rlt := gdb.Order(where.GetOrders()).Find(&ts)
 
 	if rlt.RowsAffected <= 0 {
 		return nil
@@ -164,11 +170,14 @@ func ExecQueryListMapWithCondition[T any](where basemodel.IQuery, page *page.Pag
 	t := new(T)
 	var ts []map[string]any
 	page.SetTotalSize(count)
-	gdb2 := gormdb.Model(t).Offset(page.GetOffset()).Limit(page.GetLimit()).Where(whereMap)
+	gdb := gormdb.Model(t).Offset(page.GetOffset()).Limit(page.GetLimit()).Where(whereMap)
 	if conditions != "" {
-		gdb2 = gdb2.Where(conditions, condArgs...)
+		gdb = gdb.Where(conditions, condArgs...)
 	}
-	rlt := gdb2.Where(query, args...).Order(where.GetOrders()).Find(&ts)
+	if query != nil {
+		gdb = gdb.Where(query, args...)
+	}
+	rlt := gdb.Order(where.GetOrders()).Find(&ts)
 
 	if rlt.RowsAffected <= 0 {
 		return nil
@@ -179,20 +188,30 @@ func ExecQueryListMapWithCondition[T any](where basemodel.IQuery, page *page.Pag
 	return ts
 }
 
-// 查询指定字段，结果集暂时限制100条
-func ExecQueryListWithColumns[T any](columns []string, where basemodel.IQuery, query interface{}, args ...interface{}) []*T {
-	if columns == nil || where == nil {
+// 查询指定字段, 返回字段的map列表
+func ExecQueryListWithColumns[T any](columns []string, where basemodel.IQuery, page *page.Page, query interface{}, args ...interface{}) []map[string]any {
+	if page == nil {
 		return nil
 	}
-	whereMap, conditions, condArgs := convertWhereQuery(where)
-	ts := []*T{}
 
-	// rlt := gormdb.Select(columns).Where(where).Where(query, args...).Limit(100).Find(&ts)
-	gdb := gormdb.Select(columns).Where(whereMap)
+	count := ExecGetQueryCountWithCondition[T](where, query, args...)
+	if count < 1 {
+		return nil
+	}
+
+	whereMap, conditions, condArgs := convertWhereQuery(where)
+
+	t := new(T)
+	var ts []map[string]any
+	page.SetTotalSize(count)
+	gdb := gormdb.Model(t).Select(columns).Offset(page.GetOffset()).Limit(page.GetLimit()).Where(whereMap)
 	if conditions != "" {
 		gdb = gdb.Where(conditions, condArgs...)
 	}
-	rlt := gdb.Where(query, args...).Limit(100).Find(&ts)
+	if query != nil {
+		gdb = gdb.Where(query, args...)
+	}
+	rlt := gdb.Order(where.GetOrders()).Find(&ts)
 
 	if rlt.RowsAffected <= 0 {
 		return nil
@@ -205,6 +224,9 @@ func ExecQueryListWithColumns[T any](columns []string, where basemodel.IQuery, q
 
 // 原生sql查询
 func RawSqlQueryList[T any](sql string, args ...interface{}) (res []*T) {
+	if sql == "" {
+		return nil
+	}
 	ts := []*T{}
 	rlt := gormdb.Raw(sql, args...).Scan(&ts)
 	if rlt.RowsAffected <= 0 {
@@ -218,6 +240,9 @@ func RawSqlQueryList[T any](sql string, args ...interface{}) (res []*T) {
 
 // 原生sql查询，支持列表分页
 func RawSqlQueryListWithPage[T any](page *page.Page, sql string, args ...interface{}) (res []*T) {
+	if page == nil || sql == "" {
+		return nil
+	}
 	ts := []*T{}
 	var total int64
 	rlt := gormdb.Table("("+sql+") AS CT", args...).Count(&total)
@@ -238,6 +263,9 @@ func RawSqlQueryListWithPage[T any](page *page.Page, sql string, args ...interfa
 
 // 原生sql查询，支持列表分页，支持自定义条件where condition
 func RawSqlQueryListWithPageWhere[T any](where basemodel.IQuery, page *page.Page, sql string, args ...interface{}) (res []*T) {
+	if page == nil {
+		return nil
+	}
 	ts := []*T{}
 	var total int64
 
