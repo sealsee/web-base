@@ -93,32 +93,16 @@ func isServiceRunning(port int) (isRun bool, newPort int) {
 func getPidFromPort(port int) int {
 	res := -1
 
-	// var outBytes bytes.Buffer
-	// cmdStr := fmt.Sprintf("netstat -ano -p tcp | findstr %d", port)
-	// cmd := exec.Command("cmd", "/c", cmdStr)
-	// cmd.Stdout = &outBytes
-	// cmd.Run()
-	// resStr := outBytes.String()
-	// r := regexp.MustCompile(`\s\d+\s`).FindAllString(resStr, -1)
-	// if len(r) > 0 {
-	// 	pid, err := strconv.Atoi(strings.TrimSpace(r[0]))
-	// 	if err == nil {
-	// 		res = pid
-	// 	}
-	// }
-
 	var cmd string
 	var args []string
 	if runtime.GOOS == "windows" {
 		cmd = "cmd"
 		args = []string{"/c", "netstat", "-ano", "-p", "tcp", "|", "findstr", strconv.Itoa(port)}
+	} else if runtime.GOOS == "linux" {
+		cmd = "lsof"
+		args = []string{"-i", fmt.Sprintf(":%d", port), "|", "grep LISTEN"}
 	} else {
-		cmd = "grep"
-		args = []string{strconv.Itoa(port), "-a", "/proc/net/tcp"}
-		if runtime.GOOS == "linux" {
-			cmd = "grep"
-			args = []string{strconv.Itoa(port), "-a", "--color=never", "/proc/net/tcp"}
-		}
+		return res
 	}
 	out, err := exec.Command(cmd, args...).Output()
 	if err != nil {
@@ -131,9 +115,16 @@ func getPidFromPort(port int) int {
 		if strings.Contains(line, strconv.Itoa(port)) {
 			fmt.Println(line)
 			fields := strings.Fields(line)
-			pid, err := strconv.Atoi(fields[len(fields)-1])
-			if err == nil {
-				res = pid
+			if runtime.GOOS == "windows" {
+				pid, err := strconv.Atoi(fields[len(fields)-1])
+				if err == nil {
+					res = pid
+				}
+			} else if runtime.GOOS == "linux" {
+				pid, err := strconv.Atoi(fields[1])
+				if err == nil {
+					res = pid
+				}
 			}
 		}
 	}
