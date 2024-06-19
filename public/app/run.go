@@ -15,7 +15,6 @@ import (
 	"strings"
 	"syscall"
 	"time"
-	"yy_mgr/webres"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sealsee/web-base/public/setting"
@@ -220,16 +219,17 @@ func RunServerGraceful() {
 	engine, cleanup := InitServer()
 	defer cleanup()
 	// 内嵌前端页面路由
-	if setting.Conf.UiInside == "embed" {
-		webres.InitWebResource(engine)
-		html := webres.NewHtmlHandler()
-		group := engine.Group("/ui")
-		{
-			group.GET("", html.Index)
-		}
-		engine.NoRoute(html.RedirectIndex)
-		syncH5ApiConfig(sys.LOCAL_IP, serverPort)
-	} else if setting.Conf.UiInside == "outdir" {
+	// if setting.Conf.UiInside == "embed" {
+	// 	webres.InitWebResource(engine)
+	// 	html := webres.NewHtmlHandler()
+	// 	group := engine.Group("/ui")
+	// 	{
+	// 		group.GET("", html.Index)
+	// 	}
+	// 	engine.NoRoute(html.RedirectIndex)
+	// 	syncH5ApiConfig(sys.LOCAL_IP, serverPort)
+	// }
+	if setting.Conf.UiInside == "outdir" {
 		// 静态资源路由设置
 		engine.Static("/ui", "webres/html")
 		engine.NoRoute(func(c *gin.Context) { c.Redirect(http.StatusFound, "/ui") })
