@@ -24,14 +24,15 @@ func Capitalize(str string) string {
 
 // ToUnderScoreCase 将驼峰命名转下划线命名，如：helloWorld（或HelloWorld） -> hello_world
 func ToUnderScoreCase(str string) string {
-	str = strings.ToLower(str[0:1]) + str[1:]
 	var retStr = ""
-	for i, s := range str {
-		if 64 < s && s < 91 && i != 0 {
-			retStr += "_" + string(s+32)
-
-		} else {
-			retStr += string(s)
+	if str != "" {
+		str = strings.ToLower(str[0:1]) + str[1:]
+		for i, s := range str {
+			if 64 < s && s < 91 && i != 0 {
+				retStr += "_" + string(s+32)
+			} else {
+				retStr += string(s)
+			}
 		}
 	}
 	return retStr
@@ -81,6 +82,9 @@ func ConvertToLittleCamelCase(name string) string {
 	return result
 }
 func DeleteExtraSpace(s string) string {
+	if s == "" {
+		return ""
+	}
 	regStr := "\\s{2,}"
 	reg, _ := regexp.Compile(regStr)
 	tmpStr := make([]byte, len(s))
