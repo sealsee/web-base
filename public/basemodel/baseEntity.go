@@ -95,14 +95,28 @@ func (p *BaseEntityQuery) AddOrderAsc(column string) {
 	if p.orders == nil {
 		p.orders = make([]string, 0)
 	}
-	p.orders = append(p.orders, column+" ASC")
+	if column != "" {
+		p.orders = append(p.orders, column+" ASC")
+	}
 }
 
 func (p *BaseEntityQuery) AddOrderDesc(column string) {
 	if p.orders == nil {
 		p.orders = make([]string, 0)
 	}
-	p.orders = append(p.orders, column+" DESC")
+	if column != "" {
+		p.orders = append(p.orders, column+" DESC")
+	}
+}
+
+func (p *BaseEntityQuery) AddOrderBy(column string, sort string) {
+	if p.orders == nil {
+		p.orders = make([]string, 0)
+	}
+	if column == "" || sort == "" || (strings.ToUpper(sort) != "ASC" && strings.ToUpper(sort) != "DESC") {
+		return
+	}
+	p.orders = append(p.orders, column+" "+sort)
 }
 
 func (p *BaseEntityQuery) GetOrders() string {
