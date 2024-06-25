@@ -46,7 +46,7 @@ func RegisterServer() *gin.Engine {
 		initRoutes(group, false)
 	}
 	//做鉴权的
-	group.Use(middlewares.JWTAuthMiddleware(), middlewares.PrivilegeMiddleware())
+	group.Use(middlewares.JWTAuthMiddleware())
 	{
 		initRoutes(group, true)
 	}
@@ -77,9 +77,17 @@ func initRoutes(r *gin.RouterGroup, checkLogin bool) {
 				continue
 			}
 			if h.IsGet() {
-				r_temp.GET(h.Pattern, h.Action)
+				if h.NeedRoles != "" || h.NeedPermission != "" {
+					r_temp.GET(h.Pattern, middlewares.PrivilegeMiddleware(h.NeedRoles, h.NeedPermission), h.Action)
+				} else {
+					r_temp.GET(h.Pattern, h.Action)
+				}
 			} else {
-				r_temp.POST(h.Pattern, h.Action)
+				if h.NeedRoles != "" || h.NeedPermission != "" {
+					r_temp.POST(h.Pattern, middlewares.PrivilegeMiddleware(h.NeedRoles, h.NeedPermission), h.Action)
+				} else {
+					r_temp.POST(h.Pattern, h.Action)
+				}
 			}
 		}
 	}

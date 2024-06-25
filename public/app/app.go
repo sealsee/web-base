@@ -44,7 +44,9 @@ func initCompent(settingds *setting.Datasource) func() {
 
 func initPlugin() {
 	if appPlugin == nil {
-		return
+		// 使用内置权限校验，也可以在应用端调用RunBefore设置自定义组件
+		appPlugin = new(AppPlugin)
+		appPlugin.CheckPriv = middlewares.NewPermissionCheck()
 	}
 
 	if appPlugin.LogStore != nil {

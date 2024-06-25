@@ -15,6 +15,9 @@ type SessionUser struct {
 	IsUsed   bool              `json:"isUsed"`
 	Ext      map[string]string `json:"ext,omitempty"`
 
+	Roles       []string `json:"roles"`
+	Permissions []string `json:"permissions"`
+
 	LoginDevice string             `json:"loginDevice"`
 	LoginIp     string             `json:"loginIp"`
 	LoginTime   basemodel.BaseTime `json:"loginTime"`

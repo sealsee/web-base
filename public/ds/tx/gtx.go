@@ -34,6 +34,11 @@ type Db struct {
 	*gorm.DB
 }
 
+// 扩展方法-更新，支持自定义条件、支持所有字段置NULL、支持数字类型置零
+func (db *Db) UpdatesNew(uWhere interface{}, uData basemodel.IEntidy) (tx *gorm.DB) {
+	return db.UpdatesNewWithCondition(uWhere, uData, nil)
+}
+
 // 扩展方法-更新，支持自定义条件、支持所有字段置NULL、支持数字类型置零、支持条件传参
 func (db *Db) UpdatesNewWithCondition(uWhere interface{}, uData basemodel.IEntidy, condition interface{}, args ...interface{}) (tx *gorm.DB) {
 	dataMap, _ := jsonUtils.StructToDbMap(uData)
@@ -60,11 +65,6 @@ func (db *Db) UpdatesNewWithCondition(uWhere interface{}, uData basemodel.IEntid
 		gdb.Where(condition, args...)
 	}
 	return gdb.Updates(dataMap)
-}
-
-// 扩展方法-更新，支持自定义条件、支持所有字段置NULL、支持数字类型置零
-func (db *Db) UpdatesNew(uWhere interface{}, uData basemodel.IEntidy) (tx *gorm.DB) {
-	return db.UpdatesNewWithCondition(uWhere, uData, nil)
 }
 
 // 执行写操作

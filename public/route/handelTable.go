@@ -34,11 +34,13 @@ type groupTable struct {
 }
 
 type handelTable struct {
-	Method    MethodType
-	Pattern   string
-	Action    func(*gin.Context)
-	NeedLogin bool
-	Mark      string
+	Method         MethodType
+	Pattern        string
+	Action         func(*gin.Context)
+	NeedLogin      bool
+	NeedRoles      string
+	NeedPermission string
+	Mark           string
 }
 
 func (h *groupTable) IsDefault() bool {
@@ -68,6 +70,10 @@ func AddGroup(group string, mark string) (g *groupTable) {
 }
 
 func (g *groupTable) AddHandel(method MethodType, pattern string, action func(*gin.Context), needLogin bool, mark string) *groupTable {
+	return g.AddHandelPower(method, pattern, action, needLogin, "", "", mark)
+}
+
+func (g *groupTable) AddHandelPower(method MethodType, pattern string, action func(*gin.Context), needLogin bool, needRoles, needPermission, mark string) *groupTable {
 	if pattern == "" || action == nil {
 		return g
 	}
@@ -75,7 +81,7 @@ func (g *groupTable) AddHandel(method MethodType, pattern string, action func(*g
 		method = POST
 	}
 
-	ht := handelTable{Method: method, Pattern: pattern, Action: action, NeedLogin: needLogin}
+	ht := handelTable{Method: method, Pattern: pattern, Action: action, NeedLogin: needLogin, NeedRoles: needRoles, NeedPermission: needPermission}
 	g.Handel = append(g.Handel, ht)
 
 	absolutePath := ""
@@ -101,16 +107,46 @@ func (g *groupTable) AddGETHandel(pattern string, action func(*gin.Context), nee
 	return g.AddHandel(GET, pattern, action, needLogin, mark)
 }
 
-func (g *groupTable) AddGETHandelWithLogin(pattern string, action func(*gin.Context), mark string) *groupTable {
+func (g *groupTable) AddGETHandelLogin(pattern string, action func(*gin.Context), mark string) *groupTable {
 	return g.AddHandel(GET, pattern, action, true, mark)
+}
+
+// 需要登录且指定角色needRoles、权限needPermission
+func (g *groupTable) AddGETHandelPower(pattern string, action func(*gin.Context), needLogin bool, needRoles, needPermissions, mark string) *groupTable {
+	return g.AddHandelPower(GET, pattern, action, true, needRoles, needPermissions, mark)
+}
+
+// 需要登录且指定角色needRoles
+func (g *groupTable) AddGETHandelPowerR(pattern string, action func(*gin.Context), needLogin bool, needRoles, mark string) *groupTable {
+	return g.AddHandelPower(GET, pattern, action, true, needRoles, "", mark)
+}
+
+// 需要登录且指定权限needPermission
+func (g *groupTable) AddGETHandelPowerP(pattern string, action func(*gin.Context), needLogin bool, needPermissions, mark string) *groupTable {
+	return g.AddHandelPower(GET, pattern, action, true, "", needPermissions, mark)
 }
 
 func (g *groupTable) AddPOSTHandel(pattern string, action func(*gin.Context), needLogin bool, mark string) *groupTable {
 	return g.AddHandel(POST, pattern, action, needLogin, mark)
 }
 
-func (g *groupTable) AddPOSTHandelWithLogin(pattern string, action func(*gin.Context), mark string) *groupTable {
+func (g *groupTable) AddPOSTHandelLogin(pattern string, action func(*gin.Context), mark string) *groupTable {
 	return g.AddHandel(POST, pattern, action, true, mark)
+}
+
+// 需要登录且指定角色needRoles、权限needPermission
+func (g *groupTable) AddPOSTHandelPower(pattern string, action func(*gin.Context), needLogin bool, needRoles, needPermission, mark string) *groupTable {
+	return g.AddHandelPower(POST, pattern, action, true, needRoles, needPermission, mark)
+}
+
+// 需要登录且指定角色needRoles
+func (g *groupTable) AddPOSTHandelPowerR(pattern string, action func(*gin.Context), needLogin bool, needRoles, mark string) *groupTable {
+	return g.AddHandelPower(POST, pattern, action, true, needRoles, "", mark)
+}
+
+// 需要登录且指定权限needPermission
+func (g *groupTable) AddPOSTHandelPowerP(pattern string, action func(*gin.Context), needLogin bool, needPermissions, mark string) *groupTable {
+	return g.AddHandelPower(POST, pattern, action, true, "", needPermissions, mark)
 }
 
 func GetUrlMark(url string) string {

@@ -10,15 +10,19 @@ import (
 var cp ICheckPrivilege
 
 type ICheckPrivilege interface {
-	Check(path string, loginUser *context.SessionUser) bool
+	Check(path, needRoles, needPermissions string, sessionUser *context.SessionUser) bool
 }
 
 func SetCheckPrivilege(check ICheckPrivilege) {
 	cp = check
 }
 
-func PrivilegeMiddleware() func(c *gin.Context) {
+func PrivilegeMiddleware(needRoles, needPermissions string) func(c *gin.Context) {
 	return func(c *gin.Context) {
+		if needRoles == "" && needPermissions == "" {
+			c.Next()
+		}
+
 		path := c.Request.URL.Path
 		if path == "" || path == "/" {
 			return
@@ -28,7 +32,7 @@ func PrivilegeMiddleware() func(c *gin.Context) {
 		if cp == nil {
 			return
 		}
-		if cp.Check(path, user) {
+		if cp.Check(path, needRoles, needPermissions, user) {
 			c.Next()
 		} else {
 			json := web.NewJsonResult(c)
