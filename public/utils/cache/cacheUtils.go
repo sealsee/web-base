@@ -76,8 +76,8 @@ func GetStruct[T any](key string, t *T) (*T, error) {
 		}
 	}()
 	newT := new(T)
-	LoginUserJson := GetString(key)
-	err := json.Unmarshal([]byte(LoginUserJson), newT)
+	structJsonString := GetString(key)
+	err := json.Unmarshal([]byte(structJsonString), newT)
 	return newT, err
 }
 

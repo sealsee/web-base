@@ -45,71 +45,76 @@ func (p *PermissionCheck) Check(path, needRoles, needPermissions string, session
 
 	ANY, NOT, SEP, ALLPERMISSION := "any:", "not:", ",", "*:*:*"
 	// 角色校验
-	if strings.HasPrefix(needRoles, ANY) {
-		needRoleList := strings.Split(needRoles[len(ANY):], SEP)
-		hasRole := false
-		for _, role := range needRoleList {
-			if stringUtils.ContainsStr(userRoles, role) {
-				hasRole = true
-				break
+	if needRoles != "" {
+		if strings.HasPrefix(needRoles, ANY) {
+			needRoleList := strings.Split(needRoles[len(ANY):], SEP)
+			hasRole := false
+			for _, role := range needRoleList {
+				if stringUtils.ContainsStr(userRoles, role) {
+					hasRole = true
+					break
+				}
 			}
-		}
-		if !hasRole {
-			fmt.Println("role check fail, with any.")
-			return false
-		}
-	} else if strings.HasPrefix(needRoles, NOT) {
-		needRoleList := strings.Split(needRoles[len(NOT):], SEP)
-		for _, role := range needRoleList {
-			if stringUtils.ContainsStr(userRoles, role) {
-				fmt.Println("role check fail, with not.")
+			if !hasRole {
+				fmt.Println("role check fail, with any.")
 				return false
 			}
-		}
-	} else {
-		needRoleList := strings.Split(needRoles, SEP)
-		for _, role := range needRoleList {
-			if !stringUtils.ContainsStr(userRoles, role) {
-				fmt.Println("role check fail.")
-				return false
+		} else if strings.HasPrefix(needRoles, NOT) {
+			needRoleList := strings.Split(needRoles[len(NOT):], SEP)
+			for _, role := range needRoleList {
+				if stringUtils.ContainsStr(userRoles, role) {
+					fmt.Println("role check fail, with not.")
+					return false
+				}
+			}
+		} else {
+			needRoleList := strings.Split(needRoles, SEP)
+			for _, role := range needRoleList {
+				if !stringUtils.ContainsStr(userRoles, role) {
+					fmt.Println("role check fail.")
+					return false
+				}
 			}
 		}
 	}
 
 	// 权限校验
-	if stringUtils.ContainsStr(userPermissions, ALLPERMISSION) {
-		fmt.Println("permission all pass.")
-		return true
-	}
-	if strings.HasPrefix(needPermissions, ANY) {
-		needPermList := strings.Split(needPermissions[len(ANY):], SEP)
-		hasPerm := false
-		for _, perm := range needPermList {
-			if stringUtils.ContainsStr(userPermissions, perm) {
-				hasPerm = true
-				break
+	if needPermissions != "" {
+		if stringUtils.ContainsStr(userPermissions, ALLPERMISSION) {
+			fmt.Println("permission all pass.")
+			return true
+		}
+		if strings.HasPrefix(needPermissions, ANY) {
+			needPermList := strings.Split(needPermissions[len(ANY):], SEP)
+			hasPerm := false
+			for _, perm := range needPermList {
+				if stringUtils.ContainsStr(userPermissions, perm) {
+					hasPerm = true
+					break
+				}
 			}
-		}
-		if !hasPerm {
-			fmt.Println("permission check fail, with any.")
-			return false
-		}
-	} else if strings.HasPrefix(needPermissions, NOT) {
-		needPermList := strings.Split(needPermissions[len(NOT):], SEP)
-		for _, perm := range needPermList {
-			if stringUtils.ContainsStr(userPermissions, perm) {
-				fmt.Println("permission check fail, with not.")
+			if !hasPerm {
+				fmt.Println("permission check fail, with any.")
 				return false
 			}
-		}
-	} else {
-		needPermList := strings.Split(needPermissions, SEP)
-		for _, perm := range needPermList {
-			if !stringUtils.ContainsStr(userPermissions, perm) {
-				fmt.Println("permission check fail.")
-				return false
+		} else if strings.HasPrefix(needPermissions, NOT) {
+			needPermList := strings.Split(needPermissions[len(NOT):], SEP)
+			for _, perm := range needPermList {
+				if stringUtils.ContainsStr(userPermissions, perm) {
+					fmt.Println("permission check fail, with not.")
+					return false
+				}
+			}
+		} else {
+			needPermList := strings.Split(needPermissions, SEP)
+			for _, perm := range needPermList {
+				if !stringUtils.ContainsStr(userPermissions, perm) {
+					fmt.Println("permission check fail.")
+					return false
+				}
 			}
 		}
 	}
+
 	return true
 }
