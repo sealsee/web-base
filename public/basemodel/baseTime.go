@@ -37,6 +37,11 @@ func (t BaseTime) String() string {
 	return time.Time(t).Format(timeFormat)
 }
 
+// 格式化时间
+func (t BaseTime) FormatString(format string) string {
+	return time.Time(t).Format(format)
+}
+
 // gorm自定义数据类型须实现Scanner/Valuer接口
 func (t BaseTime) Value() (driver.Value, error) {
 	return time.Time(t).Format(timeFormat), nil
