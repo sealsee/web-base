@@ -3,7 +3,8 @@ package page
 const (
 	PAGE_SIZE        = 10
 	EXPORT_PAGE_SIZE = 100
-	MAX_PAGE_SIZE    = 1000
+	LARGE_PAGE_SIZE  = 1000
+	MAX_PAGE_SIZE    = 10000 // 最大限制
 )
 
 type Page struct {
@@ -21,6 +22,10 @@ func NewPage() *Page {
 
 func NewExportPage() *Page {
 	return &Page{CurPage: 1, PageSize: EXPORT_PAGE_SIZE}
+}
+
+func NewMaxPage() *Page {
+	return &Page{CurPage: 1, PageSize: MAX_PAGE_SIZE}
 }
 
 func (p *Page) SetTotalSize(totalSize int) {

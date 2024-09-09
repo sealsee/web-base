@@ -16,7 +16,7 @@ func (e ERROR) String() string {
 
 // 异常内容变量赋值
 func (e ERROR) Format(a ...any) ERROR {
-	return ERROR{e[0], fmt.Sprintf(e[1], a)}
+	return ERROR{e[0], fmt.Sprintf(e[1], a...)}
 }
 
 var (
