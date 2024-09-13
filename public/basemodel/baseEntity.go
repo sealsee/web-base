@@ -1,6 +1,7 @@
 package basemodel
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -257,4 +258,18 @@ func (p *Entity) GetConditions() ([]string, []string, []interface{}) {
 		return nil, nil, nil
 	}
 	return p.whereCols, p.whereCond, p.condVals
+}
+
+func (p *Entity) GetConditionArgs() (conditions string, args []interface{}) {
+	if len(p.whereCond) <= 0 {
+		return conditions, nil
+	}
+	for i := 1; i <= len(p.whereCond); i++ {
+		suffix := "AND"
+		if i == len(p.whereCond) {
+			suffix = ""
+		}
+		conditions += fmt.Sprintf("%v %v ", p.whereCond[i-1], suffix)
+	}
+	return conditions, p.condVals
 }
