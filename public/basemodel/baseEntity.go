@@ -209,6 +209,14 @@ func (p *Entity) buildCompare(column string, value interface{}, cond string) *En
 			if v == 0 {
 				return p
 			}
+		case int32:
+			if v == 0 {
+				return p
+			}
+		case int64:
+			if v == 0 {
+				return p
+			}
 		case string:
 			if v == "" {
 				return p
