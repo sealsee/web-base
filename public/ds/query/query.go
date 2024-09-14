@@ -223,6 +223,19 @@ func ExecQueryListWithColumns[T any](columns []string, where basemodel.IQuery, p
 }
 
 // 原生sql查询
+func RawSqlQuery[T any](sql string, args ...interface{}) T {
+	var ts T
+	if sql == "" {
+		return ts
+	}
+	rlt := gormdb.Raw(sql, args...).Scan(&ts)
+	if rlt.Error != nil {
+		panic(rlt.Error)
+	}
+	return ts
+}
+
+// 原生sql查询
 func RawSqlQueryList[T any](sql string, args ...interface{}) (res []*T) {
 	if sql == "" {
 		return nil
