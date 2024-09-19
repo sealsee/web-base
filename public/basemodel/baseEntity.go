@@ -230,6 +230,10 @@ func (p *Entity) buildCompare(column string, value interface{}, cond string) *En
 			if math.Abs(v-0) < 0.0000001 {
 				return p
 			}
+		case BaseTime:
+			if v.IsZero() {
+				return p
+			}
 		}
 		p.whereCols = append(p.whereCols, column)
 		p.whereCond = append(p.whereCond, column+" "+cond+" ?")
