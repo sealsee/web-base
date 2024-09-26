@@ -14,7 +14,8 @@ type BaseTime time.Time
 
 func (t *BaseTime) UnmarshalJSON(data []byte) (err error) {
 	if t.IsZero() {
-		return nil
+		*t = BaseTime(time.Time{})
+		return
 	}
 	newTime, err := time.ParseInLocation("\""+timeFormat+"\"", string(data), time.Local)
 	*t = BaseTime(newTime)
@@ -22,18 +23,12 @@ func (t *BaseTime) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (t BaseTime) MarshalJSON() ([]byte, error) {
-	if t.IsZero() {
-		return nil, nil
-	}
 	timeStr := fmt.Sprintf("\"%s\"", time.Time(t).Format(timeFormat))
 	return []byte(timeStr), nil
 }
 
 // MarshalText 实现了TextMarshaler接口，用于将BaseTime转换为map
 func (t BaseTime) MarshalText() ([]byte, error) {
-	if t.IsZero() {
-		return nil, nil
-	}
 	timeStr := fmt.Sprintf("\"%s\"", time.Time(t).Format(timeFormat))
 	return []byte(timeStr), nil
 }
@@ -43,17 +38,11 @@ func (t BaseTime) IsZero() bool {
 }
 
 func (t BaseTime) String() string {
-	if t.IsZero() {
-		return ""
-	}
 	return time.Time(t).Format(timeFormat)
 }
 
 // 格式化时间
 func (t BaseTime) FormatString(format string) string {
-	if t.IsZero() {
-		return ""
-	}
 	return time.Time(t).Format(format)
 }
 
