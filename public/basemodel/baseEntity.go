@@ -172,6 +172,38 @@ func (p *Entity) AddLikeRight(column string, conditionVal string) *Entity {
 
 // AND column = ?
 func (p *Entity) AddEq(column string, value interface{}) *Entity {
+	// 使用多重赋值来检查是否有值
+	switch v := value.(type) {
+	case int:
+		if v == 0 {
+			return p
+		}
+	case int32:
+		if v == 0 {
+			return p
+		}
+	case int64:
+		if v == 0 {
+			return p
+		}
+	case string:
+		if v == "" {
+			return p
+		}
+	case float32:
+		f := float64(v)
+		if math.Abs(f-0) < 0.0000001 {
+			return p
+		}
+	case float64:
+		if math.Abs(v-0) < 0.0000001 {
+			return p
+		}
+	case BaseTime:
+		if v.IsZero() {
+			return p
+		}
+	}
 	return p.buildCompare(column, value, "=")
 }
 
@@ -203,38 +235,6 @@ func (p *Entity) AddGe(column string, value interface{}) *Entity {
 // 构建比较方法
 func (p *Entity) buildCompare(column string, value interface{}, cond string) *Entity {
 	if value != nil {
-		// 使用多重赋值来检查是否有值
-		switch v := value.(type) {
-		case int:
-			if v == 0 {
-				return p
-			}
-		case int32:
-			if v == 0 {
-				return p
-			}
-		case int64:
-			if v == 0 {
-				return p
-			}
-		case string:
-			if v == "" {
-				return p
-			}
-		case float32:
-			f := float64(v)
-			if math.Abs(f-0) < 0.0000001 {
-				return p
-			}
-		case float64:
-			if math.Abs(v-0) < 0.0000001 {
-				return p
-			}
-		case BaseTime:
-			if v.IsZero() {
-				return p
-			}
-		}
 		p.whereCols = append(p.whereCols, column)
 		p.whereCond = append(p.whereCond, column+" "+cond+" ?")
 		p.condVals = append(p.condVals, value)
