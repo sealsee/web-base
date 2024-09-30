@@ -13,10 +13,6 @@ const (
 type BaseTime time.Time
 
 func (t *BaseTime) UnmarshalJSON(data []byte) (err error) {
-	if t.IsZero() {
-		*t = BaseTime(time.Time{})
-		return
-	}
 	newTime, err := time.ParseInLocation("\""+timeFormat+"\"", string(data), time.Local)
 	*t = BaseTime(newTime)
 	return
