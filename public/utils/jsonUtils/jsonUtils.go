@@ -3,6 +3,7 @@ package jsonUtils
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/sealsee/web-base/public/basemodel"
 	"github.com/sealsee/web-base/public/utils/stringUtils"
@@ -56,14 +57,26 @@ func StructToDbMap(in interface{}) (map[string]interface{}, error) {
 			continue
 		}
 		// 忽略gorm:"-"字段
-		if tf.Tag.Get("gorm") == "-" {
+		gormTag := tf.Tag.Get("gorm")
+		if gormTag == "-" {
 			continue
 		}
 		// 忽略0值字段
 		if isZero(f.Interface()) {
 			continue
 		}
-		out[stringUtils.ToUnderScoreCase(tf.Name)] = f.Interface()
+		// 对应的列名称（tag中定义）
+		realCol := ""
+		gormTags := strings.Split(gormTag, ";")
+		for _, v := range gormTags {
+			if strings.Contains(v, "column:") {
+				realCol = strings.Replace(v, "column:", "", -1)
+			}
+		}
+		if realCol == "" {
+			realCol = stringUtils.ToUnderScoreCase(tf.Name)
+		}
+		out[realCol] = f.Interface()
 	}
 
 	return out, nil
