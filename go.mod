@@ -21,6 +21,7 @@ require (
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/mssola/user_agent v0.6.0
 	github.com/natefinch/lumberjack v2.0.0+incompatible
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/viper v1.16.0
@@ -39,7 +40,6 @@ require (
 
 require (
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
-	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	golang.org/x/time v0.3.0 // indirect
 )
 

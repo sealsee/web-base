@@ -153,7 +153,7 @@ func GinLogger(url *map[string]string) gin.HandlerFunc {
 				"userName":   userName,
 			}
 			lg.Info(path, zap.Any("-", params))
-			go Log(params)
+			Log(params) //待优化
 			// lg.Info(path,
 			// 	zap.Time("reqTime", start),
 			// 	zap.String("appName", ""),
@@ -216,6 +216,7 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 					errmsg = httpStatus.Error.Msg()
 				}
 
+				path := c.Request.URL.Path
 				if !isBizError {
 					params := map[string]any{}
 					if stack {
@@ -244,7 +245,8 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 							zap.String("request", string(httpRequest)),
 						)
 					}
-					go ErrLog(params)
+					ErrLog(params)
+					lg.Error(path, zap.Any("-", params))
 				}
 
 				c.JSON(http.StatusOK, web.JsonResult{Code: fmt.Sprintf("%d", httpStatus.Error), Msg: errmsg})
