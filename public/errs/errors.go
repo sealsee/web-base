@@ -9,9 +9,9 @@ func (e ERROR) Invalid() bool {
 	return len(e) > 0
 }
 
-// 异常信息转为字符串，按code-msg格式拼接
+// 异常信息转为字符串，按msg(code)格式拼接
 func (e ERROR) String() string {
-	return fmt.Sprintf("%v-%v", e[0], e[1])
+	return fmt.Sprintf("%v(%v)", e[1], e[0])
 }
 
 // 异常内容变量赋值
