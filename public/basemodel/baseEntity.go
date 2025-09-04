@@ -39,6 +39,7 @@ type BaseEntity struct {
 	Entity
 	toNullCols []string `gorm:"-" json:"-"` //更新时需要置空(null)的字段列表
 	toZeroCols []string `gorm:"-" json:"-"` //更新时需要设0值(0、"")的字段列表，仅支持int和string类型字段
+
 }
 
 type BaseEntityQuery struct {
@@ -122,7 +123,7 @@ func (p *BaseEntityQuery) AddOrderBy(column string, sort string) {
 }
 
 func (p *BaseEntityQuery) GetOrders() string {
-	if p.orders == nil || len(p.orders) <= 0 {
+	if len(p.orders) <= 0 {
 		return ""
 	}
 	return strings.Join(p.orders, ",")
@@ -287,7 +288,7 @@ func (p *Entity) AddIsNotNull(column string) *Entity {
 }
 
 func (p *Entity) GetConditions() ([]string, []string, []interface{}) {
-	if p.whereCols == nil || len(p.whereCols) <= 0 {
+	if len(p.whereCols) <= 0 {
 		return nil, nil, nil
 	}
 	return p.whereCols, p.whereCond, p.condVals
